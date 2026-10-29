@@ -1,6 +1,6 @@
 # GitHub 연결·브랜치 설정 인계
 
-상태(2026-10-29): 새 private 저장소 kimmoksan/appliance-hearing 생성. main(.gitignore 첫 커밋)·develop 푸시 완료. docs/service-design에서 문서 PR 진행. 브랜치 보호 규칙은 미설정.
+상태(2026-10-29): 새 private 저장소 kimmoksan/appliance-hearing 생성. main(.gitignore 첫 커밋)·develop 푸시 완료. 최초 문서는 docs/service-design → develop PR #1로 반영. 브랜치 보호 규칙은 미설정.
 
 ## 구조
 
