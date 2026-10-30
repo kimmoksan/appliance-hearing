@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { DECISIONS, EVIDENCE_LABEL, decisionText, summarize, type SummaryClaim } from '../decision'
 import { SCENES } from '../scenes'
 import type { DecisionDraft, Hearing, Product } from '../types'
+import Kkang from '../components/Kkang'
 import { Stepper } from './ProductCheck'
 
 type Props = {
@@ -53,8 +54,8 @@ export default function DecisionSummary({ product, hearings, draft, onChange, on
       <li key={a.id}><p className="muted small">{a.sceneTitle}</p><p>{a.question}</p><strong>{a.answer}</strong></li>
     ))}</ul></section>}
     <div className="summary-grid">
-      <article className="card"><h2>이득</h2><p className="muted small">살깡이(찬성)가 짚은 편익</p><ClaimList items={summary.benefits} /></article>
-      <article className="card"><h2>불편</h2><p className="muted small">말깡이(반대)가 짚은 부담과 조건</p><ClaimList items={summary.costs} /></article>
+      <article className="card"><div className="card-kkang"><Kkang pose="pro_present" size="sm" /><h2>이득</h2></div><p className="muted small">살깡이(찬성)가 짚은 편익</p><ClaimList items={summary.benefits} /></article>
+      <article className="card"><div className="card-kkang"><Kkang pose="con_note" size="sm" /><h2>불편</h2></div><p className="muted small">말깡이(반대)가 짚은 부담과 조건</p><ClaimList items={summary.costs} /></article>
       <article className="card"><h2>확인 필요</h2>{summary.checks.length ? <ul className="summary-items">{summary.checks.map((c) => (
         <li key={c.id}><p className="muted small">{c.sceneTitle}</p><p>{c.text}</p>
           {c.sceneIndex !== undefined && <button type="button" className="link small" onClick={() => onReview(c.sceneIndex!)}>이 장면 확인하기 →</button>}</li>
@@ -66,7 +67,7 @@ export default function DecisionSummary({ product, hearings, draft, onChange, on
         {s.url && <a className="url small" href={s.url} target="_blank" rel="noopener noreferrer">{s.url}</a>}</li>
     ))}</ul></details>}
     <section className="card my-decision">
-      <h2>내 선택은</h2>
+      <div className="card-kkang"><Kkang pose={draft.choice ? 'guide_wave' : 'guide_review'} size="sm" /><div><h2>내 선택은</h2><p className="muted small">판깡이는 결과를 정하지 않아요. 결정은 직접 골라요.</p></div></div>
       <fieldset className="decision-choices"><legend className="sr-only">구매 결정</legend>
         {(Object.keys(DECISIONS) as NonNullable<DecisionDraft['choice']>[]).map((choice) => <label className="chip" key={choice}>
           <input type="radio" name="decision" value={choice} checked={draft.choice === choice} onChange={() => onChange({ ...draft, choice })} />{DECISIONS[choice]}

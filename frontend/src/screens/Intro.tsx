@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { fetchCatalog, type FieldErrors } from '../api'
 import HouseArt from '../components/HouseArt'
+import Kkang from '../components/Kkang'
 import { CATEGORIES, type CatalogProduct, type IntakeInput } from '../types'
 
 type Props = {
@@ -63,6 +64,11 @@ export default function Intro({ input, onChange, onSubmit, onExample, busy, erro
         <p className="eyebrow">구매 전, 한 번 더.</p>
         <h1>내 생활에 맞는지,<br />먼저 살펴보세요.</h1>
         <p className="muted">살까 말까 고민될 때, 살깡이와 말깡이가 대신 다퉈 드려요</p>
+        <div className="kkang-trio" aria-hidden="true">
+          <Kkang pose="pro_wave" delay={0} />
+          <Kkang pose="guide_greet" delay={0.6} />
+          <Kkang pose="con_curious" delay={1.2} />
+        </div>
 
         <fieldset className="chips" disabled={busy}>
           <legend>1. 제품군</legend>
