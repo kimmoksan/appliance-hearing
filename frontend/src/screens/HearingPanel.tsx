@@ -33,9 +33,10 @@ export default function HearingPanel({ product, sceneId, answer, onAnswer, cache
       category: product.category,
       scene_id: sceneId,
       reason: product.reason,
-      source_ids: product.sources.map((s) => s.id),
+      // AI가 웹에서 찾은 자료는 제품 사실 근거로 인용할 수 없게 뺀다.
+      source_ids: product.sources.filter((s) => s.kind !== 'ai').map((s) => s.id),
       answer,
-      facts: product.sources.slice(0, 5).map((s) => ({ source_id: s.id, text: s.text.slice(0, 3000) })),
+      facts: product.sources.slice(0, 5).map((s) => ({ source_id: s.id, text: s.text.slice(0, 3000), verified: s.kind !== 'ai' })),
       previous: answer ? cached ?? null : null,
     })
       .then((h) => {

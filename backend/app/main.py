@@ -25,7 +25,7 @@ def health() -> dict[str, str]:
 @app.post("/api/intake")
 def intake(req: IntakeRequest) -> Product:
     try:
-        return build_product(req)
+        return build_product(req, generate=generate_json if current_mode() == "live" else None)
     except ValueError as e:
         raise HTTPException(status_code=422, detail=str(e))
 

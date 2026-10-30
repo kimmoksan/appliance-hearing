@@ -20,7 +20,7 @@ export type Spec = {
 
 export type Source = {
   id: string
-  kind: 'user_input' | 'example' | 'link' | 'catalog'
+  kind: 'user_input' | 'example' | 'link' | 'catalog' | 'ai'
   text: string
   url: string | null
   received_at: string
@@ -66,7 +66,7 @@ export type HearingRequest = {
   reason: string
   source_ids: string[]
   answer: string | null
-  facts?: { source_id: string; text: string }[]
+  facts?: { source_id: string; text: string; verified?: boolean }[]
   previous?: Hearing | null
 }
 

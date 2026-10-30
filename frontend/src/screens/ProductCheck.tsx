@@ -13,11 +13,12 @@ type Props = {
   onAddInfo: (text: string) => void
 }
 
-const SOURCE_LABEL = { user_input: '입력한 자료', example: '예시 자료', link: '링크 자료', catalog: '제조사 공식' }
+const SOURCE_LABEL = { user_input: '입력한 자료', example: '예시 자료', link: '링크 자료', catalog: '제조사 공식', ai: 'AI가 찾은 정보' }
 
 function sourceNote(s: Source) {
   if (s.kind === 'catalog') return `제조사 공식 · 확인일 ${s.checked_at ?? '확인 필요'}`
   const at = new Date(s.received_at).toLocaleString('ko-KR')
+  if (s.kind === 'ai') return 'AI가 웹 검색으로 찾은 정보 · 확인 필요. 아래 웹페이지에서 직접 확인해 주세요.'
   if (s.kind === 'example') return '서비스가 준비한 예시 자료예요. 실제 제품 정보가 아니에요.'
   if (s.kind === 'link') return `입력한 링크에서 읽은 페이지 내용 · ${at}`
   return `사용자가 직접 입력한 내용 · ${at} 입력`
@@ -105,7 +106,7 @@ export default function ProductCheck({ product, busy, errors, message, onBack, o
                 <tr key={s.key}>
                   <th scope="row">{s.label}</th>
                   <td>{s.status === 'needs_check' ? <span className="muted">{s.value || '확인 필요'}</span> : s.value}</td>
-                  <td><span className="tag outline small">{s.status === 'needs_check' ? '확인 필요' : sourceTag(s.source_id) === '제조사 공식' ? '제조사 확인' : sourceTag(s.source_id)}</span></td>
+                  <td><span className="tag outline small">{s.status === 'needs_check' ? (s.value ? 'AI가 찾음 · 확인 필요' : '확인 필요') : sourceTag(s.source_id) === '제조사 공식' ? '제조사 확인' : sourceTag(s.source_id)}</span></td>
                 </tr>
               ))}
             </tbody>
