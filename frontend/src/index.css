@@ -1,0 +1,33 @@
+:root {
+  color-scheme: dark;
+  --bg: #12122a;
+  --fg: #ececf6;
+  --muted: #a3a3c2;
+  --accent: #a78bfa;
+  font-family: system-ui, 'Pretendard', 'Malgun Gothic', sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+}
+
+body {
+  margin: 0;
+}
+
+main {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 24px 16px;
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+  color: var(--accent);
+  font-size: 0.875rem;
+}
+
+.muted {
+  color: var(--muted);
+}
