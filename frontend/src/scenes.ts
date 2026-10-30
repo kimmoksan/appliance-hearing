@@ -44,7 +44,7 @@ const ROBOT_VACUUM: Scene[] = [
     layers: [
       { asset: 'rv_dock', x: 270, y: 124, w: 24, h: 28 },
       { asset: 'prop_cable', x: 120, y: 160, w: 24, h: 8 },
-      { asset: 'prop_socks', x: 180, y: 156, w: 12, h: 8 },
+      { asset: 'prop_socks', x: 196, y: 167, w: 12, h: 8 },
       { asset: 'prop_book', x: 80, y: 164, w: 14, h: 6 },
       { asset: 'prop_toy', x: 60, y: 150, w: 8, h: 8 },
       // 물건 앞에서 멈췄다가 돌아가는 것까지만. 실제 회피 성능을 표현하지 않는다.
