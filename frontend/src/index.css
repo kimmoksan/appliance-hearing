@@ -90,6 +90,17 @@ main:has(> .intro) {
 .intro select { min-width: 0; max-width: 100%; text-overflow: ellipsis; }
 .catalog-mode { align-self: flex-start; margin-top: 12px; text-decoration: underline; }
 .catalog-note { margin: 6px 0 0; font-size: 0.875rem; }
+.summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 16px; }
+.summary-grid > *, .my-decision { min-width: 0; }
+.summary-items { list-style: none; padding: 0; margin: 0; }
+.summary-items > li { padding: 12px 0; border-bottom: 1px solid var(--line); overflow-wrap: anywhere; }
+.summary-items > li:last-child { border-bottom: 0; }
+.summary-items p { margin: 0 0 8px; }
+.summary-items details { font-size: 0.875rem; }
+.decision-summary summary { cursor: pointer; }
+.decision-choices { display: flex; flex-wrap: wrap; gap: 12px; border: 0; padding: 0; margin: 12px 0 20px; }
+.decision-choices input { width: auto; margin: 0; padding: 0; accent-color: var(--accent); }
+.my-decision > label { display: block; }
 .specs { table-layout: fixed; width: 100%; }
 .specs th, .specs td { overflow-wrap: anywhere; }
 [aria-invalid='true'] { border-color: var(--error) !important; }

@@ -66,3 +66,5 @@ export type HearingRequest = {
   source_ids: string[]
   answer: string | null
 }
+
+export type DecisionDraft = { choice: 'buy' | 'hold' | 'decline' | null; reason: string }

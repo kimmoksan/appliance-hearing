@@ -7,6 +7,8 @@ type Props = {
   sceneId: string
   answer: string | null
   onAnswer: (answer: string) => void
+  cached?: Hearing
+  onLoaded: (hearing: Hearing) => void
   top?: ReactNode
 }
 
@@ -19,13 +21,13 @@ const KIND_LABEL: Record<EvidenceKind, string> = {
 const SIDE = { pro: { label: '찬성', portrait: 'ui_pro' }, con: { label: '반대', portrait: 'ui_con' } }
 const STATUS = { revised: '주장 수정', withdrawn: '주장 철회' }
 
-export default function HearingPanel({ product, sceneId, answer, onAnswer, top }: Props) {
-  const [hearing, setHearing] = useState<Hearing | null>(null)
-  const [error, setError] = useState<string | null>(null)
+export default function HearingPanel({ product, sceneId, answer, onAnswer, cached, onLoaded, top }: Props) {
+  const [response, setResponse] = useState<{ answer: string | null; hearing?: Hearing; error?: string } | null>(null)
   const [selected, setSelected] = useState<string | null>(null)
   const [retry, setRetry] = useState(0)
 
   useEffect(() => {
+    if (cached && cached.answered === answer) return
     let alive = true
     fetchHearing({
       category: product.category,
@@ -36,18 +38,21 @@ export default function HearingPanel({ product, sceneId, answer, onAnswer, top }
     })
       .then((h) => {
         if (!alive) return
-        setError(null)
-        setHearing(h)
+        setResponse({ answer, hearing: h })
+        onLoaded(h)
       })
-      .catch((e) => alive && setError(e instanceof ApiError ? e.message : '공방을 불러오지 못했어요.'))
+      .catch((e) => alive && setResponse({ answer, error: e instanceof ApiError ? e.message : '공방을 불러오지 못했어요.' }))
     return () => { alive = false }
-  }, [product, sceneId, answer, retry])
+  }, [product, sceneId, answer, retry, cached, onLoaded])
+
+  const hearing = cached?.answered === answer ? cached : response?.answer === answer ? response.hearing : undefined
+  const error = response?.answer === answer && !hearing ? response.error : undefined
 
   if (error) {
     return (
       <div className="card" role="alert">
         <p>{error}</p>
-        <button type="button" className="secondary small" onClick={() => setRetry(retry + 1)}>다시 시도</button>
+        <button type="button" className="secondary small" onClick={() => { setResponse(null); setRetry(retry + 1) }}>다시 시도</button>
       </div>
     )
   }

@@ -2,19 +2,22 @@ import { useState } from 'react'
 import Stage from '../components/Stage'
 import HearingPanel from './HearingPanel'
 import { SCENES } from '../scenes'
-import type { Product } from '../types'
+import type { Hearing, Product } from '../types'
 
-type Props = { product: Product; onBack: () => void; onFinish: () => void }
+type Props = {
+  product: Product; onBack: () => void; onFinish: () => void
+  hearings: Record<string, Hearing>; answers: Record<string, string>
+  onHearing: (hearing: Hearing) => void; onAnswer: (id: string, answer: string) => void
+  index: number; onIndexChange: (index: number) => void; active: boolean
+}
 
 const prefersReducedMotion = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
 
-export default function Scenes({ product, onBack, onFinish }: Props) {
+export default function Scenes({ product, onBack, onFinish, hearings, answers, onHearing, onAnswer, index, onIndexChange, active }: Props) {
   const scenes = SCENES[product.category]
-  const [index, setIndex] = useState(0)
   const [paused, setPaused] = useState(prefersReducedMotion)
   const [view, setView] = useState<'scene' | 'hearing'>('scene')
-  // 장면별 질문 답변. 장면을 오가도 유지된다(탭 상태).
-  const [answers, setAnswers] = useState<Record<string, string>>({})
+  const setIndex = onIndexChange
 
   const scene = scenes[index]
   return (
@@ -40,14 +43,16 @@ export default function Scenes({ product, onBack, onFinish }: Props) {
           product={product}
           sceneId={scene.id}
           answer={answers[scene.id] ?? null}
-          onAnswer={(a) => setAnswers({ ...answers, [scene.id]: a })}
-          top={<Stage scene={scene} paused={paused} />}
+          cached={hearings[scene.id]}
+          onLoaded={onHearing}
+          onAnswer={(a) => onAnswer(scene.id, a)}
+          top={<Stage scene={scene} paused={paused || !active} />}
         />
       ) : (
 
       <div className="scenes-grid">
         <div className="player">
-          <Stage scene={scene} paused={paused} />
+          <Stage scene={scene} paused={paused || !active} />
           <div className="player-bar">
             <button type="button" className="secondary small" aria-pressed={paused} onClick={() => setPaused(!paused)}>
               {paused ? '움직임 다시 보기' : '움직임 멈추기'}
