@@ -53,8 +53,8 @@ export default function DecisionSummary({ product, hearings, draft, onChange, on
       <li key={a.id}><p className="muted small">{a.sceneTitle}</p><p>{a.question}</p><strong>{a.answer}</strong></li>
     ))}</ul></section>}
     <div className="summary-grid">
-      <article className="card"><h2>이득</h2><p className="muted small">찬성 측이 제시한 편익</p><ClaimList items={summary.benefits} /></article>
-      <article className="card"><h2>불편</h2><p className="muted small">반대 측이 짚은 부담과 조건</p><ClaimList items={summary.costs} /></article>
+      <article className="card"><h2>이득</h2><p className="muted small">살깡이(찬성)가 짚은 편익</p><ClaimList items={summary.benefits} /></article>
+      <article className="card"><h2>불편</h2><p className="muted small">말깡이(반대)가 짚은 부담과 조건</p><ClaimList items={summary.costs} /></article>
       <article className="card"><h2>확인 필요</h2>{summary.checks.length ? <ul className="summary-items">{summary.checks.map((c) => (
         <li key={c.id}><p className="muted small">{c.sceneTitle}</p><p>{c.text}</p>
           {c.sceneIndex !== undefined && <button type="button" className="link small" onClick={() => onReview(c.sceneIndex!)}>이 장면 확인하기 →</button>}</li>

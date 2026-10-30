@@ -7,7 +7,7 @@ from app.hearing import MOCK_ANSWERS, Hearing, HearingError, HearingRequest, che
 from app.intake import EXAMPLE, Category, IntakeRequest, Product, build_product
 from app.catalog import CatalogSummary, load_catalog
 
-app = FastAPI(title="가전 구매 청문회 API")
+app = FastAPI(title="살깡말깡 API")
 
 
 def current_mode() -> str:

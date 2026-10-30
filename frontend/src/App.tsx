@@ -86,7 +86,7 @@ export default function App() {
   return (
     <>
       <header className="site-header">
-        <button type="button" className="logo" onClick={restart}>BEFORE</button>
+        <button type="button" className="logo" onClick={restart}>살깡말깡</button>
         <nav>
           <a href="#how">이용 방법</a>
           <button type="button" className="link" onClick={() => run(fetchExample)}>예시 체험</button>
