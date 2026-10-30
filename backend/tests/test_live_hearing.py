@@ -84,3 +84,10 @@ def test_generate_json_never_puts_key_in_errors(monkeypatch):
     with pytest.raises(GeminiError) as e:
         generate_json("hi")
     assert sent["key"] == "test-secret-value" and "test-secret-value" not in str(e.value)
+
+
+def test_answer_cannot_flip_side_of_existing_claim():
+    prev = live_hearing(HearingRequest(**REQ), lambda p: GOOD)
+    flipped = {**GOOD, "claims": [{**GOOD["claims"][0], "side": "con"}, GOOD["claims"][1]]}
+    with pytest.raises(GeminiError):
+        live_hearing(HearingRequest(**REQ, answer="yes", previous=prev), lambda p: flipped)
