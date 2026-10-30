@@ -58,6 +58,7 @@ export type Hearing = {
   claims: Claim[]
   question: Question | null
   answered: string | null
+  notice?: string | null
 }
 export type HearingRequest = {
   category: Category
@@ -65,6 +66,8 @@ export type HearingRequest = {
   reason: string
   source_ids: string[]
   answer: string | null
+  facts?: { source_id: string; text: string }[]
+  previous?: Hearing | null
 }
 
 export type DecisionDraft = { choice: 'buy' | 'hold' | 'decline' | null; reason: string }

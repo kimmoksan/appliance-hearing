@@ -20,6 +20,7 @@ def test_live_without_key_stays_mock(monkeypatch):
 def test_live_with_key_never_leaks_key(monkeypatch):
     monkeypatch.setenv("APP_MODE", "live")
     monkeypatch.setenv("GEMINI_API_KEY", "test-secret-value")
+    monkeypatch.setenv("GEMINI_MODEL", "test-model")
     res = client.get("/api/health")
     assert res.json()["mode"] == "live"
     assert "test-secret-value" not in res.text
