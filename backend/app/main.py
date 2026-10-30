@@ -25,7 +25,9 @@ def health() -> dict[str, str]:
 @app.post("/api/intake")
 def intake(req: IntakeRequest) -> Product:
     try:
-        return build_product(req, generate=generate_json if current_mode() == "live" else None)
+        # shortcut: AI 사양 검색(spec_finder)은 무료 등급에서 Google 검색 도구가 429로 막혀 꺼 둔다.
+        # 유료 등급이 되면 generate=generate_json if current_mode() == "live" else None 으로 되살린다.
+        return build_product(req)
     except ValueError as e:
         raise HTTPException(status_code=422, detail=str(e))
 

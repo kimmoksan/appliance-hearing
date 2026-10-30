@@ -42,11 +42,13 @@ def test_ai_failure_keeps_input_and_explains():
     assert p.sources[0].kind == "user_input" and any("429" in n for n in p.notices)
 
 
-def test_mock_mode_never_calls_ai(monkeypatch):
-    monkeypatch.delenv("APP_MODE", raising=False)
-    monkeypatch.setattr(main, "generate_json", lambda *a, **k: pytest.fail("예시 모드에서 AI 호출"))
+def test_intake_does_not_call_ai_search_while_disabled(monkeypatch):
+    monkeypatch.setenv("APP_MODE", "live")
+    monkeypatch.setenv("GEMINI_API_KEY", "test-secret-value")
+    monkeypatch.setenv("GEMINI_MODEL", "test-model")
+    monkeypatch.setattr(main, "generate_json", lambda *a, **k: pytest.fail("AI 사양 검색은 꺼져 있어야 함"))
     body = client.post("/api/intake", json={"category": "dryer", "product_text": "아무 건조기", "reason": "x"}).json()
-    assert any("예시 모드" in n for n in body["notices"])
+    assert any("붙여넣으면" in n for n in body["notices"])
 
 
 def test_ai_found_source_cannot_be_product_fact():

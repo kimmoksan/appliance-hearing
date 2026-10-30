@@ -146,7 +146,7 @@ def build_product(req: IntakeRequest, *, is_example: bool = False, generate=None
         except GeminiError as e:
             notices.append(f"AI 사양 찾기를 하지 못했어요: {e}")
     elif not is_example:
-        notices.append("예시 모드에서는 AI가 사양을 찾지 않아요. 항목은 ‘확인 필요’로 둬요.")
+        notices.append("목록에 없는 제품은 사양을 ‘확인 필요’로 둬요. 상품 페이지의 스펙 표를 복사해 붙여넣으면 공방이 더 정확해져요.")
     name = (name or "링크로 입력한 제품")[:NAME_MAX]
 
     specs = [

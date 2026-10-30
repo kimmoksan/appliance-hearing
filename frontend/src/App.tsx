@@ -4,7 +4,6 @@ import Intro from './screens/Intro'
 import ProductCheck from './screens/ProductCheck'
 import Scenes from './screens/Scenes'
 import DecisionSummary from './screens/DecisionSummary'
-import LogoMark from './components/LogoMark'
 import type { DecisionDraft, Hearing, IntakeInput, Product } from './types'
 
 type Health = { status: string; mode: 'mock' | 'live' }
@@ -88,8 +87,7 @@ export default function App() {
     <>
       <header className="site-header">
         <button type="button" className="logo" onClick={restart} aria-label="살깡말깡 처음으로">
-          <LogoMark />
-          <span><span className="logo-pro">살깡</span><span className="logo-con">말깡</span></span>
+          <img src="/assets/logo_wordmark.png" alt="살깡말깡" />
         </button>
         <nav>
           <a href="#how">이용 방법</a>
