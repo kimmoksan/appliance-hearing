@@ -60,7 +60,7 @@
 
 ## 결과와 사용자 결정 (2026-10-30)
 
-- 카탈로그 PR [#7](https://github.com/kimmoksan/appliance-hearing/pull/7)은 develop에 머지됐다. `0247b3e`에서 `feature/decision-summary`를 분리했다.
+- 카탈로그 PR [#7](https://github.com/kimmoksan/salkkang-malkkang/pull/7)은 develop에 머지됐다. `0247b3e`에서 `feature/decision-summary`를 분리했다.
 - 확인한 장면의 최신 공방만 이득 / 불편 / 확인 필요로 정리한다. 판결·점수·승자는 만들지 않는다. 사용자가 살래요 / 보류 / 안 살래요를 직접 선택하며 기본 선택은 없다.
 - 내 답변, 수정된 주장과 변경 이유를 표시한다. 미응답·건너뛴 질문은 ‘확인 안 함’으로 남기며, 보지 않은 장면·미확인 사양도 확인 필요에 보존한다. 해당 장면으로 돌아가 답을 바꿀 수 있다.
 - 답변 변경 시 이전 결정은 초기화하며 최신 공방을 다시 받는다. 단순 왕복 시 답변·선택·결정 이유는 유지하고, 새 검토는 모두 초기화한다. 서버 저장 없이 탭 안에서만 유지한다.
@@ -68,9 +68,9 @@
 - `./scripts/check.ps1`: lint·타입·빌드 통과, 프론트 요약 테스트 **7 passed**, 백엔드 **43 passed / 기존 경고 1개**. 프론트 검사를 기존 전체 검사·CI에 추가했다. 새 의존성·.env 변경·실제 AI 호출은 없다.
 - 브라우저 확인: 수정 답변과 변경 이유, 건너뛰기의 ‘확인 안 함’ 표시·복사, 답변 변경 시 선택 초기화, 청문회 왕복 시 선택·이유 보존, 새 검토 초기화, 마지막 장면만 보면 1/3과 미확인 장면 표시, 해당 질문으로 돌아가기. 실제 클립보드 복사 성공, 콘솔 오류 없음. 375px 결과 화면 가로 넘침 없음.
 - `docs/catalog/`는 수정·커밋에서 제외한다. 실행은 기존 별도 worktree(`work/catalog`)와 localhost:5173을 계속 사용한다.
-- 미확인: 자동 복사 실패의 브라우저 재현, 전체 접근성·브라우저 조합. 모바일 디자인 개편은 사용자 요청으로 보류했다. 예시 공방 틀의 제한은 그대로이며 실제 AI 요약은 아니다. 기능 PR [#9](https://github.com/kimmoksan/appliance-hearing/pull/9)은 [CI #16](https://github.com/kimmoksan/appliance-hearing/actions/runs/41011671233)의 frontend·backend 통과 후 develop에 머지했다. 머지 커밋은 `b3f428f`이며 검사한 head `9f0b473`을 지정해 머지했다.
+- 미확인: 자동 복사 실패의 브라우저 재현, 전체 접근성·브라우저 조합. 모바일 디자인 개편은 사용자 요청으로 보류했다. 예시 공방 틀의 제한은 그대로이며 실제 AI 요약은 아니다. 기능 PR [#9](https://github.com/kimmoksan/salkkang-malkkang/pull/9)은 [CI #16](https://github.com/kimmoksan/salkkang-malkkang/actions/runs/41011671233)의 frontend·backend 통과 후 develop에 머지했다. 머지 커밋은 `b3f428f`이며 검사한 head `9f0b473`을 지정해 머지했다.
 
-- 통합 기록: 청문회 [#6](https://github.com/kimmoksan/appliance-hearing/pull/6), 카탈로그 선택 [#7](https://github.com/kimmoksan/appliance-hearing/pull/7), 별도 검수 데이터 [#8](https://github.com/kimmoksan/appliance-hearing/pull/8), 결과·사용자 결정 #9 모두 develop에 머지됐다. 이번 기능 PR은 검수 파일 변경 없이 13개 파일만 반영했다.
+- 통합 기록: 청문회 [#6](https://github.com/kimmoksan/salkkang-malkkang/pull/6), 카탈로그 선택 [#7](https://github.com/kimmoksan/salkkang-malkkang/pull/7), 별도 검수 데이터 [#8](https://github.com/kimmoksan/salkkang-malkkang/pull/8), 결과·사용자 결정 #9 모두 develop에 머지됐다. 이번 기능 PR은 검수 파일 변경 없이 13개 파일만 반영했다.
 
 ## 청문회 실제 AI 연결 (2026-10-30)
 

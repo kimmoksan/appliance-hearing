@@ -8,7 +8,7 @@
 
 먼저 docs/SERVICE_DESIGN.md를 읽는다. 우선순위는 docs/MOSCOW.md, 실제 상태는 docs/IMPLEMENTATION_STATUS.md. 문서는 설계 가설이며 구현 완료나 사용자 조사 결과가 아니다. 사용자 최신 지시가 문서보다 우선한다.
 
-GitHub 저장소는 kimmoksan/appliance-hearing(public, 2026-10-30 전환)로 확정. 기술 버전·최종 화풍은 미확정이다. 기존 저장소가 있다면 구조·설정·원격·브랜치를 먼저 확인하고 재초기화하거나 덮어쓰지 않는다.
+GitHub 저장소는 kimmoksan/salkkang-malkkang(public, 2026-10-30 전환 · 같은 날 appliance-hearing에서 이름 변경, 옛 주소는 GitHub가 자동 연결)로 확정. 기술 버전·최종 화풍은 미확정이다. 기존 저장소가 있다면 구조·설정·원격·브랜치를 먼저 확인하고 재초기화하거나 덮어쓰지 않는다.
 
 ## 2. 변경하면 안 되는 기획 원칙
 
