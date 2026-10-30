@@ -69,6 +69,10 @@ button, input, textarea, select { font: inherit; }
   cursor: pointer;
 }
 .logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0;
   background: none;
   border: 0;
   color: var(--accent);
@@ -77,6 +81,10 @@ button, input, textarea, select { font: inherit; }
   letter-spacing: 0.08em;
   cursor: pointer;
 }
+
+.logo-mark { width: 30px; height: 25px; }
+.logo-pro { color: var(--accent); }
+.logo-con { color: var(--con); }
 
 main { max-width: 1200px; margin: 0 auto; padding: 24px 16px 48px; }
 /* 인트로: 왼쪽 여백은 넉넉히, 오른쪽은 좁게. 도트 영역은 최대 폭 제한 */
