@@ -392,6 +392,7 @@ button:disabled { opacity: 0.6; cursor: wait; }
   display: block;
   height: auto;
   object-fit: contain;
+  image-rendering: pixelated;
   animation: kkang-pop 0.35s ease-out both, kkang-bob 2.6s ease-in-out infinite;
 }
 .kkang-sm { width: 72px; }
