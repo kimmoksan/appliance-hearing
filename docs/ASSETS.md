@@ -110,7 +110,7 @@
 
 ## 깡이 동작 18종 (v04, 2026-10-30)
 
-`frontend/public/assets/kkang/ui_{pro|con|guide}_{포즈}.png` — 원본 384×384를 18장 공통 범위(40,66)-(344,318)로 잘라 228×189로 축소(포즈가 바뀌어도 몸 위치가 튀지 않게). 정지 포즈를 바꿔 끼우고 CSS로 등장(pop)·들썩임(bob)을 준다. 동작 줄이기 설정이면 멈춤.
+`frontend/public/assets/kkang/ui_{pro|con|guide}_{포즈}.png` — 원본 384×384를 18장 공통 범위(40,66)-(344,318)로 잘라 80px 도트 격자로 줄이고(NEAREST, 색 섞지 않음) 3배 정수 확대한 240×198로 저장, CSS image-rendering: pixelated. 정지 포즈를 바꿔 끼우고 CSS로 등장(pop)·들썩임(bob)을 준다. 동작 줄이기 설정이면 멈춤.
 
 | 화면 | 연결 |
 |---|---|
