@@ -59,13 +59,17 @@ button, input, textarea { font: inherit; }
 }
 
 main { max-width: 1200px; margin: 0 auto; padding: 24px 16px 48px; }
-/* 인트로는 도트 영역이 남는 폭을 다 쓰도록 폭 제한 없음 */
-main:has(> .intro) { max-width: none; padding-inline: clamp(16px, 3vw, 48px); }
+/* 인트로: 왼쪽 여백은 넉넉히, 오른쪽은 좁게. 도트 영역은 최대 폭 제한 */
+main:has(> .intro) {
+  max-width: none;
+  padding-left: clamp(16px, 7vw, 140px);
+  padding-right: clamp(16px, 2.5vw, 40px);
+}
 
 /* intro */
 .intro {
   display: grid;
-  grid-template-columns: minmax(320px, 500px) minmax(0, 1fr);
+  grid-template-columns: minmax(320px, 560px) minmax(0, 1fr);
   gap: clamp(24px, 3vw, 48px);
 }
 .intro-form { display: flex; flex-direction: column; }
@@ -115,7 +119,10 @@ button:disabled { opacity: 0.6; cursor: wait; }
 .intro-art {
   display: grid;
   place-items: center;
-  min-height: clamp(420px, 72vh, 860px);
+  width: 100%;
+  max-width: 1040px;
+  justify-self: end;
+  min-height: clamp(380px, 62vh, 680px);
   border: 1px dashed var(--line);
   border-radius: 12px;
 }
