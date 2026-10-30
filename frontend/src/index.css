@@ -405,4 +405,6 @@ button:disabled { opacity: 0.6; cursor: wait; }
   .kkang-trio .kkang { width: 68px; }
 }
 @media (prefers-reduced-motion: reduce) { .kkang { animation: none; } }
-:root[data-still] .kkang, :root[data-still] body::before { animation-play-state: paused; }
+/* 멈춤 상태에서 'paused'로 두면 새로 나타난 깡이가 등장 첫 프레임(투명)에 멈춰 사라진다 → 애니메이션 자체를 끈다 */
+:root[data-still] .kkang { animation: none; }
+:root[data-still] body::before { animation-play-state: paused; }
