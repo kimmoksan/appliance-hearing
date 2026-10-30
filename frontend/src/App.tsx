@@ -40,8 +40,8 @@ export default function App() {
 
   function answerScene(id: string, answer: string) {
     if (answers[id] === answer) return
+    // 직전 공방은 지우지 않는다: 실제 모드는 이걸 보내야 답을 반영할 수 있고, 새 공방이 오면 덮어쓴다.
     setAnswers((previous) => ({ ...previous, [id]: answer }))
-    setHearings((previous) => { const next = { ...previous }; delete next[id]; return next })
     // 판단 근거가 달라지면 이전 결정을 자동으로 이어받지 않는다.
     setDecision(EMPTY_DECISION)
   }
