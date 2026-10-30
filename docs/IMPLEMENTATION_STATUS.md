@@ -56,3 +56,13 @@
 - GitHub 커넥터에 저장소 접근을 설정한 뒤 원격 브랜치 생성·문서 커밋·PR 생성·머지가 정상 동작했다. 저장소는 public이다. 터미널 gh 인증과는 별도다.
 - 브라우저 수동 UI 검증은 미실행. rv_clutter 외 공방은 공통 예시이며 실제 AI·카탈로그 연결·결과 화면은 미구현이다.
 - 단계별 사용자 테스트를 위해 2단계 feature/catalog 구현은 아직 시작하지 않았다. 이 완료 기록은 원래 feature/hearing 브랜치에 남겨 후속 작업에서 참고한다.
+
+## 2단계 카탈로그 선택 완료 (2026-10-30)
+
+- PR [#7](https://github.com/kimmoksan/appliance-hearing/pull/7): feature/catalog → develop, 머지 완료. 머지 커밋 `0247b3e75b0954303b5a004b915674eb3e5bdb9d`, 검사한 HEAD `dab616305d4ca9a685d083d5133b1ae6de73f029`.
+- 기본 입력은 제품군→브랜드→모델이다. 공식 사양·URL·확인일을 연결하고 미확인은 확인 필요로 유지한다. 목록 밖 직접 입력, 양쪽 경로 구매 이유 필수, 단종 표시, 누락/깨진 카탈로그 빈 목록 복구를 구현했다.
+- ./scripts/check.ps1: lint·타입·빌드 통과, 백엔드 43 passed / 기존 경고 1개. [CI](https://github.com/kimmoksan/appliance-hearing/actions/runs/41009984278)의 frontend·backend 모두 성공.
+- 실행 API로 실제 24개 모델의 사양·확인일 보존, 제품군별 6개, 미확인 2개 유지를 확인했다. 브라우저에서 선택·이유 필수·이유 수정 후 모델 유지·직접 입력·LG 미확인 표시, 375px 가로 넘침 없음, 콘솔 오류 없음을 확인했다.
+- docs/catalog 원본은 수정·기능 커밋하지 않았다. 별도 worktree에 같은 바이트 사본을 로컬 실행용으로 둔다. 새 체크아웃에는 검수 파일을 별도로 제공해야 하며, 파일이 없으면 빈 목록과 직접 입력 안내가 정상 동작이다.
+- 현재 테스트 서버는 별도 worktree `C:/Users/kjca022/Documents/Codex/2026-10-30/c-agents-md-claude-md-readme/work/catalog`의 feature/catalog 코드에서 실행한다. 화면 http://127.0.0.1:5173/, 예시 API 8001. 기존 8000 프로세스는 종료하지 않았다. 원래 C:/KMS/appliance-hearing의 feature/hearing 코드·카탈로그도 보존한다.
+- 남은 한계: 실제 AI와 결과 요약 미구현, 실데이터에 단종 모델이 없어 해당 브라우저 경로는 미검증(API/안내는 fixture 테스트로 확인), 전체 접근성/브라우저 검증은 별도. 3단계 개발은 시작하지 않았다.
