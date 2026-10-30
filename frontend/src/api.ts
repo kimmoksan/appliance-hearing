@@ -1,4 +1,4 @@
-import type { IntakeInput, Product } from './types'
+import type { Hearing, HearingRequest, IntakeInput, Product } from './types'
 
 export type FieldErrors = Partial<Record<keyof IntakeInput, string>>
 
@@ -16,7 +16,7 @@ const FIELD_MESSAGES: Record<keyof IntakeInput, string> = {
   reason: '구매 이유를 한 줄로 입력해 주세요. (최대 200자)',
 }
 
-async function request(path: string, init?: RequestInit): Promise<Product> {
+async function request<T>(path: string, init?: RequestInit): Promise<T> {
   let res: Response
   try {
     res = await fetch(path, init)
@@ -26,6 +26,7 @@ async function request(path: string, init?: RequestInit): Promise<Product> {
   if (res.status === 422) {
     // 서버 검증 오류를 필드별 한국어 안내로 바꾼다.
     const body = await res.json().catch(() => ({ detail: [] }))
+    if (typeof body.detail === 'string') throw new ApiError(body.detail) // 서버가 준 한국어 사유
     const fields: FieldErrors = {}
     for (const d of body.detail ?? []) {
       const field = d.loc?.[1] as keyof IntakeInput | undefined
@@ -37,11 +38,15 @@ async function request(path: string, init?: RequestInit): Promise<Product> {
   return res.json()
 }
 
-export const submitIntake = (input: IntakeInput) =>
-  request('/api/intake', {
+const post = <T>(path: string, data: unknown) =>
+  request<T>(path, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(input),
+    body: JSON.stringify(data),
   })
 
-export const fetchExample = () => request('/api/example')
+export const submitIntake = (input: IntakeInput) => post<Product>('/api/intake', input)
+
+export const fetchExample = () => request<Product>('/api/example')
+
+export const fetchHearing = (req: HearingRequest) => post<Hearing>('/api/hearing', req)

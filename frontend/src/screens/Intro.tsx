@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import type { FieldErrors } from '../api'
+import HouseArt from '../components/HouseArt'
 import { CATEGORIES, type IntakeInput } from '../types'
 
 type Props = {
@@ -92,8 +93,8 @@ export default function Intro({ input, onChange, onSubmit, onExample, busy, erro
         </div>
       </form>
 
-      <div className="intro-art" aria-hidden="true">
-        <img src="/assets/intro_house.png" alt="" />
+      <div className="intro-art">
+        <HouseArt />
       </div>
 
       <ol id="how" className="steps">
