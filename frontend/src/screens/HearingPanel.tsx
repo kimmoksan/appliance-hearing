@@ -1,6 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { ApiError, fetchHearing } from '../api'
-import type { Claim, EvidenceKind, Hearing, Product } from '../types'
+import Kkang, { type KkangPose } from '../components/Kkang'
+import type { Claim, Evidence, EvidenceKind, Hearing, Product } from '../types'
 
 type Props = {
   product: Product
@@ -20,8 +21,8 @@ const KIND_LABEL: Record<EvidenceKind, string> = {
 }
 // 캐릭터는 말투만 다르다. 근거 규칙은 같고, 누구도 '사세요/사지 마세요'로 결론 내지 않는다.
 const SIDE = {
-  pro: { label: '살깡이', role: '찬성', intro: '이게 생기면 뭐가 좋아지는지 말해요', portrait: 'ui_pro' },
-  con: { label: '말깡이', role: '반대', intro: '감당해야 할 부담을 콕 짚어 물어요', portrait: 'ui_con' },
+  pro: { label: '살깡이', role: '찬성', intro: '이게 생기면 뭐가 좋아지는지 말해요' },
+  con: { label: '말깡이', role: '반대', intro: '감당해야 할 부담을 콕 짚어 물어요' },
 }
 const STATUS = { revised: '주장 수정', withdrawn: '주장 철회' }
 
@@ -63,7 +64,12 @@ export default function HearingPanel({ product, sceneId, answer, onAnswer, cache
       </div>
     )
   }
-  if (!hearing) return <p className="muted" role="status">공방을 준비하고 있어요…</p>
+  if (!hearing) return (
+    <div className="hearing-loading" role="status">
+      <Kkang pose="guide_moderate" />
+      <p className="muted">판깡이가 공방을 준비하고 있어요…</p>
+    </div>
+  )
 
   const claimById = new Map(hearing.claims.map((c) => [c.id, c]))
   const focus = claimById.get(selected ?? '') ?? hearing.claims[0]
@@ -85,6 +91,7 @@ export default function HearingPanel({ product, sceneId, answer, onAnswer, cache
               key={c.id}
               claim={c}
               repliesTo={c.replies_to ? claimById.get(c.replies_to) : undefined}
+              evidence={hearing.evidence}
               active={c.id === focus.id}
               onSelect={() => setSelected(c.id)}
             />
@@ -94,7 +101,7 @@ export default function HearingPanel({ product, sceneId, answer, onAnswer, cache
         {hearing.question && (
           <div className="question card">
             <figure className="speaker">
-              <img src="/assets/ui_guide.png" alt="" className="portrait small" />
+              <Kkang pose={hearing.answered ? 'guide_listen' : 'guide_present'} size="sm" />
               <figcaption className="tag outline small">판깡이</figcaption>
             </figure>
             <div className="question-body">
@@ -147,12 +154,26 @@ export default function HearingPanel({ product, sceneId, answer, onAnswer, cache
   )
 }
 
-function ClaimRow({ claim, repliesTo, active, onSelect }: { claim: Claim; repliesTo?: Claim; active: boolean; onSelect: () => void }) {
+// 발언 상태에 맞는 포즈. 주장 수정·철회는 인정하는 표정, 미확인 근거를 짚을 땐 말깡이가 돋보기를 든다.
+function claimPose(claim: Claim, evidence: Evidence[]): KkangPose {
+  const unverified = claim.evidence_ids.some((id) => evidence.find((e) => e.id === id)?.kind === 'unverified')
+  if (claim.side === 'pro') {
+    if (claim.status === 'withdrawn') return 'pro_shy'
+    if (claim.status === 'revised') return 'pro_think'
+    return claim.replies_to ? 'pro_excited' : 'pro_present'
+  }
+  if (claim.status !== 'kept') return 'con_relieved'
+  if (claim.replies_to && claim.evidence_ids.some((id) => evidence.find((e) => e.id === id)?.kind === 'user_statement')) return 'con_note'
+  if (unverified) return 'con_inspect'
+  return claim.replies_to ? 'con_question' : 'con_curious'
+}
+
+function ClaimRow({ claim, repliesTo, evidence, active, onSelect }: { claim: Claim; repliesTo?: Claim; evidence: Evidence[]; active: boolean; onSelect: () => void }) {
   const side = SIDE[claim.side]
   return (
     <li className={`claim side-${claim.side}`}>
       <figure className="speaker">
-        <img src={`/assets/${side.portrait}.png`} alt="" className="portrait" />
+        <Kkang pose={claimPose(claim, evidence)} className="portrait-frame" />
         <figcaption className={`tag side-${claim.side}`}>{side.label}</figcaption>
       </figure>
       <div className={`bubble ${active ? 'active' : ''}`}>

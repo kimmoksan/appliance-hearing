@@ -107,3 +107,18 @@
 | ap_run | bg_living | ap_unit |
 | ap_night | bg_living (취침 톤) | ap_unit |
 | ap_filter | bg_living | ap_unit, ap_filter, ap_filter_used |
+
+## 깡이 동작 18종 (v04, 2026-10-30)
+
+`frontend/public/assets/kkang/ui_{pro|con|guide}_{포즈}.png` — 원본 384×384를 18장 공통 범위(40,66)-(344,318)로 잘라 228×189로 축소(포즈가 바뀌어도 몸 위치가 튀지 않게). 정지 포즈를 바꿔 끼우고 CSS로 등장(pop)·들썩임(bob)을 준다. 동작 줄이기 설정이면 멈춤.
+
+| 화면 | 연결 |
+|---|---|
+| 인트로 | 살깡이 wave · 판깡이 greet · 말깡이 curious |
+| 공방 로딩 | 판깡이 moderate |
+| 살깡이 발언 | 첫 주장 present · 반문 excited · 수정 think · 철회 shy |
+| 말깡이 발언 | 첫 주장 curious · 반문 question · 미확인 근거 인용 inspect · 사용자 답 인용 note · 수정/철회 relieved |
+| 판깡이 질문 | 답 전 present · 답 후 listen |
+| 결과 | 이득 카드 pro_present · 불편 카드 con_note · 내 선택 guide_review → 고르면 guide_wave |
+
+표정은 분위기만 전한다. 판정·승자·구매 권유로 쓰지 않는다. 기존 상반신 `ui_pro/ui_con/ui_guide.png`는 현재 화면에서 쓰지 않음(보관).
