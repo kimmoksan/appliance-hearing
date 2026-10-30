@@ -71,3 +71,13 @@
 - 미확인: 자동 복사 실패의 브라우저 재현, 전체 접근성·브라우저 조합. 모바일 디자인 개편은 사용자 요청으로 보류했다. 예시 공방 틀의 제한은 그대로이며 실제 AI 요약은 아니다. 기능 PR [#9](https://github.com/kimmoksan/appliance-hearing/pull/9)은 [CI #16](https://github.com/kimmoksan/appliance-hearing/actions/runs/41011671233)의 frontend·backend 통과 후 develop에 머지했다. 머지 커밋은 `b3f428f`이며 검사한 head `9f0b473`을 지정해 머지했다.
 
 - 통합 기록: 청문회 [#6](https://github.com/kimmoksan/appliance-hearing/pull/6), 카탈로그 선택 [#7](https://github.com/kimmoksan/appliance-hearing/pull/7), 별도 검수 데이터 [#8](https://github.com/kimmoksan/appliance-hearing/pull/8), 결과·사용자 결정 #9 모두 develop에 머지됐다. 이번 기능 PR은 검수 파일 변경 없이 13개 파일만 반영했다.
+
+## 청문회 실제 AI 연결 (2026-10-30)
+
+- 구현·실행 확인: `APP_MODE=live` + `GEMINI_API_KEY` + `GEMINI_MODEL`일 때 `/api/hearing`이 Gemini REST로 공방을 생성. 출력은 스키마·의미 검증(validate)을 통과해야 하며, 실패 시 한 번 재요청 후 예시 공방 + `notice`로 대체.
+- 제품 출처 원문(facts)을 데이터로 감싸 전달하고, product_fact는 실제 출처 ID만 허용. 판결 필드(winner 등)는 스키마에 없어 버려짐.
+- 질문에 답하면 직전 공방(previous)과 답을 보내 관련 발언만 수정·철회(change_reason 필수). 없는 선택지는 422.
+- 실제 호출 확인: gemini-3.5-flash, thinkingLevel low, 약 4초. 건조기 관리 장면에서 질문 생성 → '배수관 연결 불가' 답 → 반대 발언 revised 확인.
+- 확인한 사실: 이 계정에서 gemini-2.5-flash는 신규 사용 불가(404), gemini-3.8-flash는 low에서도 90초 초과.
+- 테스트: pytest 50 passed (가짜 출처 재시도 후 거부, 대체 모드, 키가 오류 메시지에 안 남음, 공백 섞인 키 정리).
+- 미확인·한계: 브라우저에서 실제 모드 화면 수동 확인 전. 장면 계획(장면 선택)은 아직 고정 3장면. 비용 한도·요청 수 제한 없음. 찬반 캐릭터 미정.

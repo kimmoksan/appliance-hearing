@@ -35,6 +35,8 @@ export default function HearingPanel({ product, sceneId, answer, onAnswer, cache
       reason: product.reason,
       source_ids: product.sources.map((s) => s.id),
       answer,
+      facts: product.sources.slice(0, 5).map((s) => ({ source_id: s.id, text: s.text.slice(0, 3000) })),
+      previous: answer ? cached ?? null : null,
     })
       .then((h) => {
         if (!alive) return
@@ -67,6 +69,8 @@ export default function HearingPanel({ product, sceneId, answer, onAnswer, cache
       <div className="debate">
         {top}
         {hearing.mode === 'mock' && <p className="tag outline mode-tag">예시 공방 · 실제 AI 응답 아님</p>}
+        {hearing.mode === 'live' && <p className="tag outline mode-tag">AI 공방 · 근거를 직접 확인하세요</p>}
+        {hearing.notice && <p className="muted small" role="status">{hearing.notice}</p>}
         <ol className="claims">
           {hearing.claims.map((c) => (
             <ClaimRow

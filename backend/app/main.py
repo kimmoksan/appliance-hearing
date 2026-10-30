@@ -2,7 +2,8 @@ import os
 
 from fastapi import FastAPI, HTTPException
 
-from app.hearing import Hearing, HearingError, HearingRequest, mock_hearing
+from app.gemini import GeminiError, generate_json
+from app.hearing import MOCK_ANSWERS, Hearing, HearingError, HearingRequest, check_scene, live_hearing, mock_hearing
 from app.intake import EXAMPLE, Category, IntakeRequest, Product, build_product
 from app.catalog import CatalogSummary, load_catalog
 
@@ -11,7 +12,7 @@ app = FastAPI(title="가전 구매 청문회 API")
 
 def current_mode() -> str:
     # 실제 모드는 명시적으로 켜고 키도 있을 때만. 그 외엔 예시(mock) 모드로 표시한다.
-    if os.getenv("APP_MODE") == "live" and os.getenv("GEMINI_API_KEY"):
+    if os.getenv("APP_MODE") == "live" and os.getenv("GEMINI_API_KEY") and os.getenv("GEMINI_MODEL"):
         return "live"
     return "mock"
 
@@ -41,8 +42,15 @@ def example() -> Product:
 
 @app.post("/api/hearing")
 def hearing(req: HearingRequest) -> Hearing:
-    # shortcut: live 모드에서도 아직 예시 공방을 돌려준다. AI 연동 시 여기서 분기.
     try:
+        check_scene(req)
+        if current_mode() == "live":
+            try:
+                return live_hearing(req, generate_json)
+            except GeminiError as e:
+                # AI 실패·검증 실패는 예시 공방으로 대체하고 이유를 화면에 알린다.
+                fallback = req.model_copy(update={"answer": req.answer if req.answer in MOCK_ANSWERS else None})
+                return mock_hearing(fallback).model_copy(update={"notice": f"{e} 예시 공방으로 보여드려요."})
         return mock_hearing(req)
     except HearingError as e:
         raise HTTPException(status_code=422, detail=str(e))
