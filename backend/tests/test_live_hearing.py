@@ -91,3 +91,28 @@ def test_answer_cannot_flip_side_of_existing_claim():
     flipped = {**GOOD, "claims": [{**GOOD["claims"][0], "side": "con"}, GOOD["claims"][1]]}
     with pytest.raises(GeminiError):
         live_hearing(HearingRequest(**REQ, answer="yes", previous=prev), lambda p: flipped)
+
+
+def test_daily_limit_and_429_stop_calls(monkeypatch):
+    live_env(monkeypatch)
+    monkeypatch.setenv("GEMINI_DAILY_LIMIT", "1")
+    monkeypatch.setattr(gemini, "_usage", {"day": "", "count": 0, "exhausted": False})
+    calls = []
+
+    def ok(url, headers, json, timeout):
+        calls.append(1)
+        return httpx.Response(200, json={"candidates": [{"content": {"parts": [{"text": "{}"}]}}]})
+
+    monkeypatch.setattr(gemini.httpx, "post", ok)
+    generate_json("a")
+    with pytest.raises(GeminiError, match="한도"):
+        generate_json("b")  # 상한 1회를 넘으면 Google에 보내지 않음
+    assert len(calls) == 1
+
+    monkeypatch.setenv("GEMINI_DAILY_LIMIT", "10")
+    monkeypatch.setattr(gemini.httpx, "post", lambda *a, **k: calls.append(1) or httpx.Response(429, json={}))
+    with pytest.raises(GeminiError):
+        generate_json("c")
+    with pytest.raises(GeminiError):
+        generate_json("d")  # 429 이후 그날은 더 보내지 않음
+    assert len(calls) == 2
