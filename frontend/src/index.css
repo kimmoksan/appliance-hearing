@@ -83,7 +83,12 @@ button, input, textarea, select { font: inherit; }
 .link { background: none; border: 0; padding: 0; text-decoration: none; cursor: pointer; }
 .logo { display: inline-flex; padding: 0; background: none; border: 0; cursor: pointer; }
 .logo img { height: var(--logo-h); width: auto; display: block; }
-@media (max-width: 480px) { .site-header { --logo-h: 34px; gap: 6px 14px; padding: 10px 16px; } }
+/* 모바일: 메뉴는 숨기고 로고(크게)와 모드 배지만 한 줄에 */
+@media (max-width: 480px) {
+  .site-header { --logo-h: 42px; flex-wrap: nowrap; gap: 12px; padding: 10px 16px; }
+  .site-header nav { display: none; }
+  .site-header .badge { margin-left: auto; white-space: nowrap; font-size: 0.6875rem; }
+}
 
 main { max-width: 1200px; margin: 0 auto; padding: 24px 16px 48px; }
 /* 인트로: 왼쪽 여백은 넉넉히, 오른쪽은 좁게. 도트 영역은 최대 폭 제한 */
