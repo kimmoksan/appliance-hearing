@@ -4,6 +4,7 @@ $failed = @()
 
 Push-Location "$root/frontend"
 npm run lint;  if ($LASTEXITCODE) { $failed += 'frontend lint' }
+npm run test;  if ($LASTEXITCODE) { $failed += 'frontend test' }
 npm run build; if ($LASTEXITCODE) { $failed += 'frontend build' }
 Pop-Location
 

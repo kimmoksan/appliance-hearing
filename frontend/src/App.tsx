@@ -1,14 +1,16 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { ApiError, fetchExample, submitIntake, type FieldErrors } from './api'
 import Intro from './screens/Intro'
 import ProductCheck from './screens/ProductCheck'
 import Scenes from './screens/Scenes'
-import type { IntakeInput, Product } from './types'
+import DecisionSummary from './screens/DecisionSummary'
+import type { DecisionDraft, Hearing, IntakeInput, Product } from './types'
 
 type Health = { status: string; mode: 'mock' | 'live' }
 
 const MODE_LABEL = { mock: '예시 모드 · 실제 AI 응답 아님', live: '실제 AI 모드' }
 const EMPTY: IntakeInput = { category: 'robot_vacuum', product_text: '', reason: '' }
+const EMPTY_DECISION: DecisionDraft = { choice: null, reason: '' }
 
 export default function App() {
   const [health, setHealth] = useState<Health | null>(null)
@@ -16,9 +18,33 @@ export default function App() {
   const [product, setProduct] = useState<Product | null>(null)
   const [started, setStarted] = useState(false)
   const [finished, setFinished] = useState(false)
+  const [hearings, setHearings] = useState<Record<string, Hearing>>({})
+  const [answers, setAnswers] = useState<Record<string, string>>({})
+  const [sceneIndex, setSceneIndex] = useState(0)
+  const [decision, setDecision] = useState<DecisionDraft>(EMPTY_DECISION)
   const [busy, setBusy] = useState(false)
   const [errors, setErrors] = useState<FieldErrors>({})
   const [message, setMessage] = useState<string | null>(null)
+  const recordHearing = useCallback((hearing: Hearing) => {
+    setHearings((previous) => ({ ...previous, [hearing.scene_id]: hearing }))
+  }, [])
+
+  function clearReview() {
+    setStarted(false)
+    setFinished(false)
+    setHearings({})
+    setAnswers({})
+    setSceneIndex(0)
+    setDecision(EMPTY_DECISION)
+  }
+
+  function answerScene(id: string, answer: string) {
+    if (answers[id] === answer) return
+    setAnswers((previous) => ({ ...previous, [id]: answer }))
+    setHearings((previous) => { const next = { ...previous }; delete next[id]; return next })
+    // 판단 근거가 달라지면 이전 결정을 자동으로 이어받지 않는다.
+    setDecision(EMPTY_DECISION)
+  }
 
   useEffect(() => {
     fetch('/api/health')
@@ -34,6 +60,7 @@ export default function App() {
     setMessage(null)
     try {
       setProduct(await call())
+      clearReview()
       onSuccess?.()
     } catch (e) {
       const err = e instanceof ApiError ? e : new ApiError('알 수 없는 오류가 났어요. 다시 시도해 주세요.')
@@ -51,8 +78,7 @@ export default function App() {
   function restart() {
     setInput(EMPTY)
     setProduct(null)
-    setStarted(false)
-    setFinished(false)
+    clearReview()
     setErrors({})
     setMessage(null)
   }
@@ -68,15 +94,17 @@ export default function App() {
         {health && <span className="badge">{MODE_LABEL[health.mode]}</span>}
       </header>
       <main>
-        {product && started && finished ? (
-          // shortcut: 결과 화면은 feature/decision-summary에서. 그 전까지 자리표시.
-          <section className="check">
-            <h1>결과 화면은 준비 중이에요</h1>
-            <p className="muted">이득·불편·확인할 것 정리와 나의 결정은 다음 단계에서 만들어요.</p>
-            <button type="button" className="link" onClick={() => setFinished(false)}>← 청문회로 돌아가기</button>
-          </section>
-        ) : product && started ? (
-          <Scenes product={product} onBack={() => setStarted(false)} onFinish={() => setFinished(true)} />
+        {product && started ? (
+          <>
+            <div hidden={finished}>
+              <Scenes product={product} hearings={hearings} answers={answers} index={sceneIndex}
+                onIndexChange={setSceneIndex} onHearing={recordHearing} onAnswer={answerScene} active={!finished}
+                onBack={() => setStarted(false)} onFinish={() => setFinished(true)} />
+            </div>
+            {finished && <DecisionSummary product={product} hearings={hearings} draft={decision}
+              onChange={setDecision} onRestart={restart}
+              onReview={(index) => { setSceneIndex(index); setFinished(false) }} />}
+          </>
         ) : product ? (
           <ProductCheck
             key={(input.catalog_model ?? '') + input.product_text + product.reason}
