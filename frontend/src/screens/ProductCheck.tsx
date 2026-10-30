@@ -13,9 +13,10 @@ type Props = {
   onAddInfo: (text: string) => void
 }
 
-const SOURCE_LABEL = { user_input: '입력한 자료', example: '예시 자료', link: '링크 자료' }
+const SOURCE_LABEL = { user_input: '입력한 자료', example: '예시 자료', link: '링크 자료', catalog: '제조사 공식' }
 
 function sourceNote(s: Source) {
+  if (s.kind === 'catalog') return `제조사 공식 · 확인일 ${s.checked_at ?? '확인 필요'}`
   const at = new Date(s.received_at).toLocaleString('ko-KR')
   if (s.kind === 'example') return '서비스가 준비한 예시 자료예요. 실제 제품 정보가 아니에요.'
   if (s.kind === 'link') return `입력한 링크에서 읽은 페이지 내용 · ${at}`
@@ -103,8 +104,8 @@ export default function ProductCheck({ product, busy, errors, message, onBack, o
               {product.specs.map((s) => (
                 <tr key={s.key}>
                   <th scope="row">{s.label}</th>
-                  <td>{s.value ?? <span className="muted">확인 필요</span>}</td>
-                  <td><span className="tag outline small">{sourceTag(s.source_id)}</span></td>
+                  <td>{s.status === 'needs_check' ? <span className="muted">{s.value || '확인 필요'}</span> : s.value}</td>
+                  <td><span className="tag outline small">{s.status === 'needs_check' ? '확인 필요' : sourceTag(s.source_id) === '제조사 공식' ? '제조사 확인' : sourceTag(s.source_id)}</span></td>
                 </tr>
               ))}
             </tbody>

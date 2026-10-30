@@ -3,7 +3,8 @@ import os
 from fastapi import FastAPI, HTTPException
 
 from app.hearing import Hearing, HearingError, HearingRequest, mock_hearing
-from app.intake import EXAMPLE, IntakeRequest, Product, build_product
+from app.intake import EXAMPLE, Category, IntakeRequest, Product, build_product
+from app.catalog import CatalogSummary, load_catalog
 
 app = FastAPI(title="가전 구매 청문회 API")
 
@@ -22,7 +23,15 @@ def health() -> dict[str, str]:
 
 @app.post("/api/intake")
 def intake(req: IntakeRequest) -> Product:
-    return build_product(req)
+    try:
+        return build_product(req)
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e))
+
+
+@app.get("/api/catalog", response_model=list[CatalogSummary])
+def catalog(category: Category | None = None):
+    return [p for p in load_catalog() if category is None or p.category == category.value]
 
 
 @app.get("/api/example")

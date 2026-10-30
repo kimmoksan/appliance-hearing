@@ -8,8 +8,9 @@ from datetime import datetime, timezone
 from enum import Enum
 from typing import Literal
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
+from app.catalog import load_catalog
 from app.link_reader import LinkError, is_url, read_link
 
 
@@ -35,16 +36,21 @@ NAME_MAX = 80
 
 class IntakeRequest(BaseModel):
     category: Category
-    product_text: str = Field(min_length=1, max_length=PRODUCT_TEXT_MAX)
+    catalog_model: str | None = Field(default=None, min_length=1, max_length=120)
+    product_text: str = Field(default="", max_length=PRODUCT_TEXT_MAX)
     reason: str = Field(min_length=1, max_length=REASON_MAX)
 
     @field_validator("product_text", "reason")
     @classmethod
     def not_blank(cls, v: str) -> str:
         v = v.strip()
-        if not v:
-            raise ValueError("공백만 입력할 수 없어요")
         return v
+
+    @model_validator(mode="after")
+    def required_inputs(self):
+        if not self.reason or (not self.catalog_model and not self.product_text):
+            raise ValueError("제품 정보와 구매 이유를 입력해 주세요.")
+        return self
 
 
 class Spec(BaseModel):
@@ -57,10 +63,11 @@ class Spec(BaseModel):
 
 class Source(BaseModel):
     id: str
-    kind: Literal["user_input", "example", "link"]
+    kind: Literal["user_input", "example", "link", "catalog"]
     text: str
     url: str | None = None
     received_at: str
+    checked_at: str | None = None
 
 
 class Product(BaseModel):
@@ -77,6 +84,29 @@ class Product(BaseModel):
 
 def build_product(req: IntakeRequest, *, is_example: bool = False) -> Product:
     now = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    if req.catalog_model:
+        item = next((p for p in load_catalog() if p.model == req.catalog_model), None)
+        if item is None or item.category != req.category.value:
+            raise ValueError("선택한 제품이 목록에 없거나 제품군이 달라요. 다시 선택해 주세요.")
+        source = Source(
+            id="src_catalog", kind="catalog", text="\n".join(f"{k}: {v}" for k, v in item.p.items()),
+            url=str(item.url), received_at=now, checked_at=item.checked_at.isoformat(),
+        )
+        sources = [source]
+        if req.product_text:
+            sources.append(Source(id="src_user", kind="user_input", text=req.product_text, received_at=now))
+        specs = [Spec(
+            key=k, label=k, value=v,
+            status="needs_check" if v.strip() in {"미확인", "확인 필요", ""} else "confirmed",
+            source_id=source.id,
+        ) for k, v in item.p.items()]
+        notices = ["사양은 제조사 공식 자료를 확인한 내용이에요. 실제 찬반 공방은 예시 모드로 진행돼요."]
+        if item.status == "단종":
+            notices.append("단종으로 기록된 제품이에요. 현재 판매·지원 여부는 별도 확인이 필요해요.")
+        return Product(
+            category=req.category, name=f"{item.name} ({item.model})", is_example=False,
+            link=str(item.url), link_read=False, reason=req.reason, specs=specs, sources=sources, notices=notices,
+        )
     first, _, rest = req.product_text.partition("\n")
     first, rest = first.strip(), rest.strip()
     link = first if is_url(first) else None

@@ -1,0 +1,17 @@
+[
+  {
+    "model": "TEST-R1", "brand": "테스트 제조사", "category": "robot_vacuum", "name": "검증용 청소기",
+    "url": "https://manufacturer.example/robot/r1", "status": "판매중", "checked_at": "2026-10-30",
+    "p": { "본체 크기 (mm)": "300 x 90 x 300", "자동 비움": "있음", "흡입력": "미확인" }
+  },
+  {
+    "model": "TEST-R2", "brand": "다른 제조사", "category": "robot_vacuum", "name": "단종 검증용 청소기",
+    "url": "https://manufacturer.example/robot/r2", "status": "단종", "checked_at": "2026-10-29",
+    "p": { "본체 크기 (mm)": "310 x 95 x 310" }
+  },
+  {
+    "model": "TEST-D1", "brand": "테스트 제조사", "category": "dryer", "name": "검증용 건조기",
+    "url": "https://manufacturer.example/dryer/d1", "status": "판매중", "checked_at": "2026-10-28",
+    "p": { "건조 용량 (kg)": "20" }
+  }
+]

@@ -79,7 +79,7 @@ export default function App() {
           <Scenes product={product} onBack={() => setStarted(false)} onFinish={() => setFinished(true)} />
         ) : product ? (
           <ProductCheck
-            key={input.product_text + product.reason}
+            key={(input.catalog_model ?? '') + input.product_text + product.reason}
             product={product}
             busy={busy}
             errors={errors}
