@@ -5,6 +5,7 @@ const W = 320
 const H = 180
 const pct = (v: number, base: number) => `${(v / base) * 100}%`
 const MS_PER_PX = 25
+const FRAME_MS = 1500
 
 // 그림 파일이 없으면 같은 이름의 임시 상자를 보여준다. 파일을 넣으면 그대로 교체된다.
 function Asset({ id, className }: { id: string; className?: string }) {
@@ -34,13 +35,23 @@ function LayerView({ layer, paused }: { layer: Layer; paused: boolean }) {
     else anim.current.play()
   }, [paused])
 
+  // 상태 그림 교체 (예: 식기세척기 열림 → 적재 → 닫힘). 멈추면 현재 상태에 머문다.
+  const [frame, setFrame] = useState(0)
+  const frames = layer.frames
+  useEffect(() => {
+    if (!frames || paused) return
+    const t = setInterval(() => setFrame((f) => (f + 1) % frames.length), FRAME_MS)
+    return () => clearInterval(t)
+  }, [frames, paused])
+  const [asset, h] = frames ? frames[frame] : [layer.asset, layer.h]
+
   return (
     <div
       ref={ref}
       className={`layer ${layer.effect ? `fx-${layer.effect}` : ''}`}
-      style={{ left: pct(layer.x, W), top: pct(layer.y, H), width: pct(layer.w, W), height: pct(layer.h, H) }}
+      style={{ left: pct(layer.x, W), top: pct(layer.y, H), width: pct(layer.w, W), height: pct(h, H) }}
     >
-      <Asset id={layer.asset} />
+      <Asset key={asset} id={asset} />
     </div>
   )
 }
@@ -52,6 +63,7 @@ export default function Stage({ scene, paused }: { scene: Scene; paused: boolean
       {scene.layers.map((l, i) => (
         <LayerView key={`${scene.id}-${i}`} layer={l} paused={paused} />
       ))}
+      {scene.tone && <div className={`tone-${scene.tone}`} />}
     </div>
   )
 }

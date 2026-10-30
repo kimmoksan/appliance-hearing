@@ -93,7 +93,7 @@ export default function Intro({ input, onChange, onSubmit, onExample, busy, erro
       </form>
 
       <div className="intro-art" aria-hidden="true">
-        <span className="muted">도트 일러스트 자리 (자산 준비 전)</span>
+        <img src="/assets/intro_house.png" alt="" />
       </div>
 
       <ol id="how" className="steps">

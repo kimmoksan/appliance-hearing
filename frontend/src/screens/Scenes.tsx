@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import Stage from '../components/Stage'
 import { SCENES } from '../scenes'
-import { CATEGORIES, type Product } from '../types'
+import type { Product } from '../types'
 
 type Props = { product: Product; onBack: () => void; onHearing: (sceneId: string) => void }
 
@@ -11,17 +11,6 @@ export default function Scenes({ product, onBack, onHearing }: Props) {
   const scenes = SCENES[product.category]
   const [index, setIndex] = useState(0)
   const [paused, setPaused] = useState(prefersReducedMotion)
-  const category = CATEGORIES.find((c) => c.id === product.category)?.label
-
-  if (!scenes) {
-    return (
-      <section className="check">
-        <h1>{category} 장면은 준비 중이에요</h1>
-        <p className="muted">도트 장면은 로봇청소기부터 만들고 있어요. 다른 제품군은 그림이 준비되면 추가돼요.</p>
-        <button type="button" className="link" onClick={onBack}>← 제품 확인으로 돌아가기</button>
-      </section>
-    )
-  }
 
   const scene = scenes[index]
   return (

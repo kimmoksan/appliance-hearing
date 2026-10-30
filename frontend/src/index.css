@@ -119,13 +119,14 @@ button:disabled { opacity: 0.6; cursor: wait; }
 .intro-art {
   display: grid;
   place-items: center;
+  image-rendering: pixelated;
   width: 100%;
   max-width: 1040px;
   justify-self: end;
   min-height: clamp(380px, 62vh, 680px);
-  border: 1px dashed var(--line);
   border-radius: 12px;
 }
+.intro-art img { width: 100%; height: auto; image-rendering: pixelated; }
 
 .steps {
   grid-column: 1 / -1;
@@ -220,6 +221,13 @@ button:disabled { opacity: 0.6; cursor: wait; }
 .fx-warn::after { content: '!'; color: #fbbf24; font-weight: 800; animation: blink 0.8s steps(2) infinite; }
 .fx-check::after { content: '✓'; color: #6ee7b7; font-weight: 800; }
 @keyframes blink { 50% { opacity: 0; } }
+.fx-spin img { animation: spin 1.2s steps(4) infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.fx-led::after {
+  content: ''; position: absolute; left: 45%; top: 27.5%; width: 15%; height: 3.75%;
+  background: #6ee7b7; animation: blink 1.6s steps(2) infinite;
+}
+.tone-night { position: absolute; inset: 0; background: rgb(10 14 48 / 0.55); pointer-events: none; }
 .stage.paused *, .stage.paused *::after { animation-play-state: paused !important; }
 
 .player-bar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
