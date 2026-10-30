@@ -2,14 +2,14 @@
 
 확인한 실행 결과만 적는다. 실행하지 않은 검사는 ‘미확인’으로 둔다.
 
-마지막 갱신: 2026-10-30 · 브랜치 `feature/scene-player`
+마지막 갱신: 2026-10-30 · 청문회 PR 준비 브랜치 `codex/hearing-pr`
 
 ## 구현·실행 확인됨
 
 | 항목 | 확인 방법 | 결과 |
 |---|---|---|
 | 프론트 뼈대 (React 19 + TS + Vite 8) | `npm run lint`, `npm run build` | 통과 |
-| 백엔드 (FastAPI, uv) | `uv run pytest -q` | 19개 통과 |
+| 백엔드 (FastAPI, uv) | `./scripts/check.ps1` 내부 `uv run pytest -q` | 29개 통과, 기존 TestClient/httpx 경고 1개 |
 | 모드 표시 | 브라우저 | ‘예시 모드 · 실제 AI 응답 아님’ |
 | CI (GitHub Actions) | PR #2, #3 | frontend·backend 통과 |
 | 입력 검증 API `POST /api/intake` | pytest + Swagger 수동 확인(사용자) | 제품군·빈칸·길이 위반 422 |
@@ -31,8 +31,17 @@
 
 ## 계획 (미착수)
 
-장면 계획 검증(AI가 고른 장면·소품 허용값 검사), 청문회·주장 갱신, 결과·결정(탭 안 요약·복사), Gemini 연동(스펙 추출 포함), 반응형·접근성 전체 점검, UT, 배포.
+장면 계획 검증(AI가 고른 장면·소품 허용값 검사), 실제 AI 청문회, 결과·결정(탭 안 요약·복사), 카탈로그 연결, Gemini 연동(스펙 추출 포함), 반응형·접근성 전체 점검, UT, 배포.
 
 ## 미확정
 
 [SERVICE_DESIGN.md §12](SERVICE_DESIGN.md) 참고.
+
+## 청문회 PR 준비 (2026-10-30)
+
+- 기존 `feature/hearing`의 코드 커밋 `60e27e5`에서 `codex/hearing-pr`을 분리했다. 이후 카탈로그 커밋 `5c277b0`과 원래 브랜치는 보존하며 이번 PR에는 카탈로그를 포함하지 않는다.
+- 예시 청문회 API·의미 검증, 상황/청문회 전환과 근거 보기, 선택 질문·생략·주장 수정, 인트로 조명 효과, 로그인 페이지 차단이 코드에 있다.
+- `./scripts/check.ps1` 재실행: 프론트 lint·타입·빌드 통과, 백엔드 29 passed / 경고 1개. UV_CACHE_DIR는 작업 공간의 캐시 디렉토리로 지정했다. 새 의존성·.env 변경·실제 AI 호출 없음.
+- 브라우저 UI 수동 검증은 이번 단계에서 미실행. rv_clutter 외 공방은 공통 예시 틀이며 결과 화면은 자리표시다.
+- GitHub 커넥터 설치·저장소 접근 설정 후 원격 PR용 브랜치 생성에 성공했다. 이 문서 작성 시 PR·CI·머지는 아직 미완료이며, PR 생성 후 CI 결과를 확인한다.
+
