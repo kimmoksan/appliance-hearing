@@ -41,7 +41,7 @@ export default function DecisionSummary({ product, hearings, draft, onChange, on
 
   return <section className="check decision-summary">
     <div className="check-head">
-      <div><p className="eyebrow">예시 공방 정리 · 실제 AI 응답 아님</p><h1>내 결정 정리</h1>
+      <div><p className="eyebrow">{Object.values(hearings).some((h) => h.mode === 'live') ? '공방 정리 · AI 응답 포함, 근거를 직접 확인하세요' : '예시 공방 정리 · 실제 AI 응답 아님'}</p><h1>내 결정 정리</h1>
         <p className="muted">공방의 주장과 확인할 사항을 모았어요. 선택은 내가 해요.</p></div>
       <Stepper current={3} />
     </div>
