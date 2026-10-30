@@ -53,8 +53,8 @@ export default function DecisionSummary({ product, hearings, draft, onChange, on
       <li key={a.id}><p className="muted small">{a.sceneTitle}</p><p>{a.question}</p><strong>{a.answer}</strong></li>
     ))}</ul></section>}
     <div className="summary-grid">
-      <article className="card"><h2>이득</h2><p className="muted small">찬성 측이 제시한 편익</p><ClaimList items={summary.benefits} /></article>
-      <article className="card"><h2>불편</h2><p className="muted small">반대 측이 짚은 부담과 조건</p><ClaimList items={summary.costs} /></article>
+      <article className="card"><h2>이득</h2><p className="muted small">살깡이(찬성)가 짚은 편익</p><ClaimList items={summary.benefits} /></article>
+      <article className="card"><h2>불편</h2><p className="muted small">말깡이(반대)가 짚은 부담과 조건</p><ClaimList items={summary.costs} /></article>
       <article className="card"><h2>확인 필요</h2>{summary.checks.length ? <ul className="summary-items">{summary.checks.map((c) => (
         <li key={c.id}><p className="muted small">{c.sceneTitle}</p><p>{c.text}</p>
           {c.sceneIndex !== undefined && <button type="button" className="link small" onClick={() => onReview(c.sceneIndex!)}>이 장면 확인하기 →</button>}</li>
@@ -62,7 +62,7 @@ export default function DecisionSummary({ product, hearings, draft, onChange, on
     </div>
     {summary.withdrawn.length > 0 && <details className="card"><summary>철회한 주장 보기 (현재 이득·불편에서 제외)</summary><ClaimList items={summary.withdrawn} /></details>}
     {product.sources.length > 0 && <details className="card"><summary>제품 자료 출처</summary><ul className="summary-items">{product.sources.map((s) => (
-      <li key={s.id}><p>{s.kind === 'catalog' ? `제조사 공식 · 확인일 ${s.checked_at ?? '확인 필요'}` : s.kind === 'example' ? '예시 자료 · 실제 제품 아님' : '사용자가 제공한 자료'}</p>
+      <li key={s.id}><p>{s.kind === 'catalog' ? `제조사 공식 · 확인일 ${s.checked_at ?? '확인 필요'}` : s.kind === 'example' ? '예시 자료 · 실제 제품 아님' : s.kind === 'ai' ? 'AI가 찾은 정보 · 확인 필요' : '사용자가 제공한 자료'}</p>
         {s.url && <a className="url small" href={s.url} target="_blank" rel="noopener noreferrer">{s.url}</a>}</li>
     ))}</ul></details>}
     <section className="card my-decision">

@@ -7,7 +7,7 @@ from app.hearing import MOCK_ANSWERS, Hearing, HearingError, HearingRequest, che
 from app.intake import EXAMPLE, Category, IntakeRequest, Product, build_product
 from app.catalog import CatalogSummary, load_catalog
 
-app = FastAPI(title="가전 구매 청문회 API")
+app = FastAPI(title="살깡말깡 API")
 
 
 def current_mode() -> str:
@@ -25,6 +25,8 @@ def health() -> dict[str, str]:
 @app.post("/api/intake")
 def intake(req: IntakeRequest) -> Product:
     try:
+        # shortcut: AI 사양 검색(spec_finder)은 무료 등급에서 Google 검색 도구가 429로 막혀 꺼 둔다.
+        # 유료 등급이 되면 generate=generate_json if current_mode() == "live" else None 으로 되살린다.
         return build_product(req)
     except ValueError as e:
         raise HTTPException(status_code=422, detail=str(e))

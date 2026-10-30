@@ -18,7 +18,11 @@ const KIND_LABEL: Record<EvidenceKind, string> = {
   assumption: '가정',
   unverified: '확인 필요',
 }
-const SIDE = { pro: { label: '찬성', portrait: 'ui_pro' }, con: { label: '반대', portrait: 'ui_con' } }
+// 캐릭터는 말투만 다르다. 근거 규칙은 같고, 누구도 '사세요/사지 마세요'로 결론 내지 않는다.
+const SIDE = {
+  pro: { label: '살깡이', role: '찬성', intro: '이게 생기면 뭐가 좋아지는지 말해요', portrait: 'ui_pro' },
+  con: { label: '말깡이', role: '반대', intro: '감당해야 할 부담을 콕 짚어 물어요', portrait: 'ui_con' },
+}
 const STATUS = { revised: '주장 수정', withdrawn: '주장 철회' }
 
 export default function HearingPanel({ product, sceneId, answer, onAnswer, cached, onLoaded, top }: Props) {
@@ -33,9 +37,10 @@ export default function HearingPanel({ product, sceneId, answer, onAnswer, cache
       category: product.category,
       scene_id: sceneId,
       reason: product.reason,
-      source_ids: product.sources.map((s) => s.id),
+      // AI가 웹에서 찾은 자료는 제품 사실 근거로 인용할 수 없게 뺀다.
+      source_ids: product.sources.filter((s) => s.kind !== 'ai').map((s) => s.id),
       answer,
-      facts: product.sources.slice(0, 5).map((s) => ({ source_id: s.id, text: s.text.slice(0, 3000) })),
+      facts: product.sources.slice(0, 5).map((s) => ({ source_id: s.id, text: s.text.slice(0, 3000), verified: s.kind !== 'ai' })),
       previous: answer ? cached ?? null : null,
     })
       .then((h) => {
@@ -71,6 +76,9 @@ export default function HearingPanel({ product, sceneId, answer, onAnswer, cache
         {hearing.mode === 'mock' && <p className="tag outline mode-tag">예시 공방 · 실제 AI 응답 아님</p>}
         {hearing.mode === 'live' && <p className="tag outline mode-tag">AI 공방 · 근거를 직접 확인하세요</p>}
         {hearing.notice && <p className="muted small" role="status">{hearing.notice}</p>}
+        <p className="muted small cast">
+          <strong>{SIDE.pro.label}</strong>(찬성) {SIDE.pro.intro} · <strong>{SIDE.con.label}</strong>(반대) {SIDE.con.intro} · <strong>판깡이</strong>(진행) 필요할 때만 물어봐요
+        </p>
         <ol className="claims">
           {hearing.claims.map((c) => (
             <ClaimRow
@@ -85,7 +93,10 @@ export default function HearingPanel({ product, sceneId, answer, onAnswer, cache
 
         {hearing.question && (
           <div className="question card">
-            <img src="/assets/ui_guide.png" alt="" className="portrait small" />
+            <figure className="speaker">
+              <img src="/assets/ui_guide.png" alt="" className="portrait small" />
+              <figcaption className="tag outline small">판깡이</figcaption>
+            </figure>
             <div className="question-body">
               <p id="q-text"><strong>{hearing.question.text}</strong> <span className="muted small">(선택 · 건너뛰어도 돼요)</span></p>
               <div className="row" role="group" aria-labelledby="q-text">
@@ -110,7 +121,7 @@ export default function HearingPanel({ product, sceneId, answer, onAnswer, cache
         <h2>근거 확인</h2>
         <p className="muted small">선택한 주장의 근거와 조건이에요.</p>
         <div className="focus">
-          <p className="tags"><span className={`tag side-${focus.side}`}>{SIDE[focus.side].label} 측</span></p>
+          <p className="tags"><span className={`tag side-${focus.side}`}>{SIDE[focus.side].label}({SIDE[focus.side].role})</span></p>
           <p>“{focus.text}”</p>
         </div>
         <ul className="evidence-list">
@@ -127,7 +138,7 @@ export default function HearingPanel({ product, sceneId, answer, onAnswer, cache
         </ul>
         {changed.map((c) => (
           <div key={c.id} className="change card">
-            <strong>↻ {SIDE[c.side].label} 측 {STATUS[c.status as 'revised' | 'withdrawn']}</strong>
+            <strong>↻ {SIDE[c.side].label} {STATUS[c.status as 'revised' | 'withdrawn']}</strong>
             <p className="small">{c.change_reason}</p>
           </div>
         ))}
@@ -145,7 +156,7 @@ function ClaimRow({ claim, repliesTo, active, onSelect }: { claim: Claim; replie
         <figcaption className={`tag side-${claim.side}`}>{side.label}</figcaption>
       </figure>
       <div className={`bubble ${active ? 'active' : ''}`}>
-        {repliesTo && <p className="muted small">↳ {SIDE[repliesTo.side].label} 주장에 대한 반문</p>}
+        {repliesTo && <p className="muted small">↳ {SIDE[repliesTo.side].label} 말에 대한 반문</p>}
         <p>
           {claim.text}
           {claim.status !== 'kept' && <span className="tag outline small status">{STATUS[claim.status]}</span>}

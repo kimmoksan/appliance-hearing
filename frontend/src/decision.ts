@@ -68,7 +68,7 @@ export function decisionText(product: Product, summary: ReturnType<typeof summar
     ...(summary.withdrawn.length ? ['', '철회된 주장 (현재 이득·불편에서 제외)', claims(summary.withdrawn)] : []),
     '', `내 결정: ${draft.choice ? DECISIONS[draft.choice] : '아직 선택하지 않음'}`,
     `내 결정 이유: ${draft.reason.trim() || '작성하지 않음'}`,
-    '', '제품 자료 출처', ...product.sources.map((s) => `- ${s.kind === 'catalog' ? '제조사 공식' : s.kind === 'example' ? '예시 자료' : '사용자가 제공한 자료'}${s.checked_at ? ` · 확인일 ${s.checked_at}` : ''}${s.url ? ` · ${s.url}` : ''}`),
+    '', '제품 자료 출처', ...product.sources.map((s) => `- ${s.kind === 'catalog' ? '제조사 공식' : s.kind === 'example' ? '예시 자료' : s.kind === 'ai' ? 'AI가 찾은 정보 · 확인 필요' : '사용자가 제공한 자료'}${s.checked_at ? ` · 확인일 ${s.checked_at}` : ''}${s.url ? ` · ${s.url}` : ''}`),
     '', '가정·미확인은 제품의 확인된 사실이 아니에요. 구매 결정은 사용자가 직접 했어요.',
     '결정은 현재 탭에서만 유지되며 서버에 저장되지 않아요.',
   ].join('\n')

@@ -91,3 +91,37 @@ def test_answer_cannot_flip_side_of_existing_claim():
     flipped = {**GOOD, "claims": [{**GOOD["claims"][0], "side": "con"}, GOOD["claims"][1]]}
     with pytest.raises(GeminiError):
         live_hearing(HearingRequest(**REQ, answer="yes", previous=prev), lambda p: flipped)
+
+
+def test_daily_limit_and_429_stop_calls(monkeypatch):
+    live_env(monkeypatch)
+    monkeypatch.setenv("GEMINI_DAILY_LIMIT", "1")
+    monkeypatch.setattr(gemini, "_usage", {"day": "", "count": 0, "exhausted": False})
+    calls = []
+
+    def ok(url, headers, json, timeout):
+        calls.append(1)
+        return httpx.Response(200, json={"candidates": [{"content": {"parts": [{"text": "{}"}]}}]})
+
+    monkeypatch.setattr(gemini.httpx, "post", ok)
+    generate_json("a")
+    with pytest.raises(GeminiError, match="한도"):
+        generate_json("b")  # 상한 1회를 넘으면 Google에 보내지 않음
+    assert len(calls) == 1
+
+    monkeypatch.setenv("GEMINI_DAILY_LIMIT", "10")
+    monkeypatch.setattr(gemini.httpx, "post", lambda *a, **k: calls.append(1) or httpx.Response(429, json={}))
+    with pytest.raises(GeminiError):
+        generate_json("c")
+    with pytest.raises(GeminiError):
+        generate_json("d")  # 429 이후 그날은 더 보내지 않음
+    assert len(calls) == 2
+
+
+def test_pacific_day_follows_us_daylight_saving():
+    from datetime import datetime, timezone
+    utc = lambda *a: datetime(*a, tzinfo=timezone.utc)
+    assert gemini.pacific_day(utc(2026, 10, 30, 6, 59)) == "2026-10-29"  # PDT 자정 전
+    assert gemini.pacific_day(utc(2026, 10, 30, 7, 0)) == "2026-10-30"   # PDT 자정(07:00 UTC)
+    assert gemini.pacific_day(utc(2026, 12, 1, 7, 59)) == "2026-11-30"   # 겨울엔 08:00 UTC
+    assert gemini.pacific_day(utc(2026, 12, 1, 8, 0)) == "2026-12-01"

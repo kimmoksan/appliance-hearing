@@ -62,7 +62,7 @@ export default function Intro({ input, onChange, onSubmit, onExample, busy, erro
       <form className="intro-form" onSubmit={handleSubmit} noValidate>
         <p className="eyebrow">구매 전, 한 번 더.</p>
         <h1>내 생활에 맞는지,<br />먼저 살펴보세요.</h1>
-        <p className="muted">제품 정보와 구매 이유만으로 시작하는 가전 구매 청문회</p>
+        <p className="muted">살까 말까 고민될 때, 살깡이와 말깡이가 대신 다퉈 드려요</p>
 
         <fieldset className="chips" disabled={busy}>
           <legend>1. 제품군</legend>

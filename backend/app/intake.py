@@ -11,7 +11,9 @@ from typing import Literal
 from pydantic import BaseModel, Field, field_validator, model_validator
 
 from app.catalog import load_catalog
+from app.gemini import GeminiError
 from app.link_reader import LinkError, is_url, read_link
+from app.spec_finder import find_specs
 
 
 class Category(str, Enum):
@@ -63,7 +65,7 @@ class Spec(BaseModel):
 
 class Source(BaseModel):
     id: str
-    kind: Literal["user_input", "example", "link", "catalog"]
+    kind: Literal["user_input", "example", "link", "catalog", "ai"]
     text: str
     url: str | None = None
     received_at: str
@@ -82,7 +84,8 @@ class Product(BaseModel):
     notices: list[str]
 
 
-def build_product(req: IntakeRequest, *, is_example: bool = False) -> Product:
+def build_product(req: IntakeRequest, *, is_example: bool = False, generate=None) -> Product:
+    """generate가 있으면(실제 모드) 목록에 없는 제품의 사양을 AI 검색으로 찾아 '확인 필요'로 채운다."""
     now = datetime.now(timezone.utc).isoformat(timespec="seconds")
     if req.catalog_model:
         item = next((p for p in load_catalog() if p.model == req.catalog_model), None)
@@ -100,7 +103,7 @@ def build_product(req: IntakeRequest, *, is_example: bool = False) -> Product:
             status="needs_check" if v.strip() in {"미확인", "확인 필요", ""} else "confirmed",
             source_id=source.id,
         ) for k, v in item.p.items()]
-        notices = ["사양은 제조사 공식 자료를 확인한 내용이에요. 실제 찬반 공방은 예시 모드로 진행돼요."]
+        notices = ["사양은 제조사 공식 자료를 확인한 내용이에요."]
         if item.status == "단종":
             notices.append("단종으로 기록된 제품이에요. 현재 판매·지원 여부는 별도 확인이 필요해요.")
         return Product(
@@ -128,10 +131,26 @@ def build_product(req: IntakeRequest, *, is_example: bool = False) -> Product:
             id=f"src_{len(sources) + 1}", kind="example" if is_example else "user_input", text=user_text, received_at=now,
         ))
         name = name or user_text.splitlines()[0].strip()
+
+    found: dict[str, str] = {}
+    if generate and not is_example:
+        try:
+            result, web = find_specs(req.category.value, SPEC_FIELDS[req.category], req.product_text, generate)
+            found = result.specs
+            lines = [f"{label}: {found[k]}" for k, label in SPEC_FIELDS[req.category] if k in found]
+            lines += ["", "참고한 웹페이지"] + [f"- {w.get('title') or w['uri']} {w['uri']}" for w in web[:5]]
+            sources.append(Source(id="src_ai", kind="ai", text="\n".join(lines), url=web[0]["uri"], received_at=now))
+            if result.name and not link:  # 읽은 링크 제목이 있으면 그걸 우선
+                name = result.name
+            notices.append("목록에 없는 제품이라 AI가 웹에서 사양을 찾았어요. 틀릴 수 있으니 출처를 확인해 주세요.")
+        except GeminiError as e:
+            notices.append(f"AI 사양 찾기를 하지 못했어요: {e}")
+    elif not is_example:
+        notices.append("목록에 없는 제품은 사양을 ‘확인 필요’로 둬요. 상품 페이지의 스펙 표를 복사해 붙여넣으면 공방이 더 정확해져요.")
     name = (name or "링크로 입력한 제품")[:NAME_MAX]
 
     specs = [
-        Spec(key=k, label=label, value=None, status="needs_check", source_id=None)
+        Spec(key=k, label=label, value=found.get(k), status="needs_check", source_id="src_ai" if k in found else None)
         for k, label in SPEC_FIELDS[req.category]
     ]
     return Product(
