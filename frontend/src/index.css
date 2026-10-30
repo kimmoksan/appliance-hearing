@@ -59,12 +59,14 @@ button, input, textarea { font: inherit; }
 }
 
 main { max-width: 1200px; margin: 0 auto; padding: 24px 16px 48px; }
+/* 인트로는 도트 영역이 남는 폭을 다 쓰도록 폭 제한 없음 */
+main:has(> .intro) { max-width: none; padding-inline: clamp(16px, 3vw, 48px); }
 
 /* intro */
 .intro {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
-  gap: 32px;
+  grid-template-columns: minmax(320px, 500px) minmax(0, 1fr);
+  gap: clamp(24px, 3vw, 48px);
 }
 .intro-form { display: flex; flex-direction: column; }
 .eyebrow { color: var(--accent); margin: 0 0 8px; }
@@ -113,7 +115,7 @@ button:disabled { opacity: 0.6; cursor: wait; }
 .intro-art {
   display: grid;
   place-items: center;
-  min-height: 420px;
+  min-height: clamp(420px, 72vh, 860px);
   border: 1px dashed var(--line);
   border-radius: 12px;
 }
@@ -179,6 +181,11 @@ button:disabled { opacity: 0.6; cursor: wait; }
 .source + .source { margin-top: 8px; }
 .url { color: var(--accent); word-break: break-all; }
 .add-info summary { cursor: pointer; }
+
+@media (max-width: 1024px) {
+  .intro { grid-template-columns: 1fr; }
+  .intro-art { min-height: 360px; }
+}
 
 @media (max-width: 768px) {
   .check-grid { grid-template-columns: 1fr; }
