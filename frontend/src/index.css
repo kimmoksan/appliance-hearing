@@ -405,3 +405,4 @@ button:disabled { opacity: 0.6; cursor: wait; }
   .kkang-trio .kkang { width: 68px; }
 }
 @media (prefers-reduced-motion: reduce) { .kkang { animation: none; } }
+:root[data-still] .kkang, :root[data-still] body::before { animation-play-state: paused; }

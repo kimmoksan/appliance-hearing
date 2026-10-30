@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Stage from '../components/Stage'
 import HearingPanel from './HearingPanel'
 import { SCENES } from '../scenes'
@@ -16,6 +16,11 @@ const prefersReducedMotion = () => window.matchMedia?.('(prefers-reduced-motion:
 export default function Scenes({ product, onBack, onFinish, hearings, answers, onHearing, onAnswer, index, onIndexChange, active }: Props) {
   const scenes = SCENES[product.category]
   const [paused, setPaused] = useState(prefersReducedMotion)
+  // '움직임 멈추기'는 장면뿐 아니라 깡이 들썩임·배경 흔들림까지 멈춘다(계속 움직이는 요소는 사용자가 멈출 수 있어야 함).
+  useEffect(() => {
+    document.documentElement.toggleAttribute('data-still', paused)
+    return () => document.documentElement.removeAttribute('data-still')
+  }, [paused])
   const [view, setView] = useState<'scene' | 'hearing'>('scene')
   const setIndex = onIndexChange
 
