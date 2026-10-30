@@ -147,19 +147,186 @@ def _rv_clutter(reason: str, answer: str | None) -> Hearing:
     return Hearing(scene_id="rv_clutter", mode="mock", evidence=evidence, claims=claims, question=question, answered=answer)
 
 
-def _generic(scene_id: str, reason: str) -> Hearing:
-    # shortcut: rv_clutter 외 장면은 공통 틀. AI 연동(feature/ai-scene-planner) 때 장면별 내용으로 대체.
+# 장면별 예시 대본. 제품 수치는 쓰지 않는다: 조건은 '가정', 제품 성능은 '확인 필요'로만.
+# no_mode: con_add = '아니요' 답에 말깡이가 이어서 짚음, pro_revise = 살깡이가 범위를 좁혀 인정.
+SCRIPTS: dict[str, dict[str, str]] = {
+    "rv_daily": {
+        "assume": "외출한 동안 청소기가 정해진 시간에 집 안을 돈다고 가정",
+        "check": "이 제품의 주행 방식과 문턱·러그 넘기 능력은 자료로 확인되지 않았어요.",
+        "pro": "퇴근하고 오면 바닥이 이미 정리돼 있어요! 매일 청소기를 꺼내는 일이 줄어요.",
+        "con": "근데 문턱이나 두꺼운 러그가 있으면, 청소기가 집 안을 다 돌 수 있을까요?",
+        "q": "집에 문턱이나 두꺼운 러그가 많은가요?",
+        "ok": "거의 없어요",
+        "no": "꽤 있어요",
+        "ok_text": "문턱·러그가 거의 없다면, 주행 걱정은 큰 단점에서 빼도 되겠어요.",
+        "ok_reason": "사용자가 문턱·러그가 거의 없다고 답했어요. 주행 성능 자체는 여전히 확인 필요예요.",
+        "no_mode": "con_add",
+        "no_text": "문턱·러그가 많다면 청소가 안 되는 구역이 생길 수 있어요. 넘을 수 있는 높이를 꼭 확인해 보세요.",
+    },
+    "rv_maintenance": {
+        "assume": "먼지통 비우기와 브러시에 감긴 머리카락 정리를 직접 한다고 가정",
+        "check": "자동 먼지 비움 지원 여부와 소모품 교체 주기는 자료로 확인되지 않았어요.",
+        "pro": "바닥 청소 시간을 생각하면, 먼지통 비우는 몇 분은 훨씬 가벼워요!",
+        "con": "머리카락이 브러시에 감기면 손으로 풀어야 해요. 그 일, 꾸준히 할 수 있으세요?",
+        "q": "주 1~2회 먼지통·브러시 관리, 괜찮나요?",
+        "ok": "괜찮아요",
+        "no": "그것도 귀찮아요",
+        "ok_text": "관리를 감당할 수 있다면, 이 부담은 결정적인 단점은 아니에요.",
+        "ok_reason": "사용자가 주기적인 관리를 감수할 수 있다고 답했어요.",
+        "no_mode": "pro_revise",
+        "no_text": "관리 부담은 인정해요. 그래도 매일 바닥 청소보다는 짧아요. 자동 비움이 되는지 확인하면 더 줄일 수 있어요.",
+        "no_reason": "사용자가 관리도 귀찮다고 답해서, 편익을 '관리가 남아도 청소보다 짧다'로 좁혔어요.",
+    },
+    "dw_load": {
+        "assume": "식사 후 식기를 바로 칸에 맞춰 넣는다고 가정",
+        "check": "애벌 헹굼이 필요한지와 1회 세척 시간은 이 제품 자료로 확인되지 않았어요.",
+        "pro": "밥 먹고 그릇 넣고 버튼만 누르면 돼요! 고무장갑 낄 일이 확 줄어요.",
+        "con": "근데 식기를 칸에 맞춰 넣고 빼는 것도 일이에요. 그 정리는 괜찮으세요?",
+        "q": "식기를 칸에 맞춰 넣고 빼는 정리, 괜찮나요?",
+        "ok": "괜찮아요",
+        "no": "그것도 번거로워요",
+        "ok_text": "넣고 빼는 정리를 감당할 수 있다면, 이 부담은 작아요.",
+        "ok_reason": "사용자가 식기 정리를 감수할 수 있다고 답했어요.",
+        "no_mode": "con_add",
+        "no_text": "넣고 빼는 정리도 부담이라면, 설거지가 줄어든 만큼 다른 정리 일이 생길 수 있어요.",
+    },
+    "dw_constraint": {
+        "assume": "웍·큰 냄비처럼 큰 조리도구를 자주 쓴다고 가정",
+        "check": "큰 냄비가 들어가는지(내부 높이, 선반 조절)는 이 제품 자료로 확인되지 않았어요.",
+        "pro": "자주 쓰는 밥그릇·접시만 맡겨도 설거지 대부분이 줄어요!",
+        "con": "큰 냄비랑 프라이팬은 결국 손으로 씻어야 하지 않을까요?",
+        "q": "큰 조리도구는 손설거지해도 괜찮나요?",
+        "ok": "괜찮아요",
+        "no": "그것도 넣고 싶어요",
+        "ok_text": "큰 것만 손으로 씻어도 괜찮다면, 이 단점은 작아져요.",
+        "ok_reason": "사용자가 큰 조리도구는 손설거지해도 된다고 답했어요.",
+        "no_mode": "pro_revise",
+        "no_text": "큰 냄비까지 맡기고 싶다면 그건 장담 못 해요. 선반 높이 조절이 되는지 먼저 확인해 보세요.",
+        "no_reason": "사용자가 큰 조리도구도 넣고 싶다고 해서, 편익을 일상 식기로 좁혔어요.",
+    },
+    "dw_maintenance": {
+        "assume": "필터에 쌓인 음식물 찌꺼기를 주기적으로 꺼내 씻는다고 가정",
+        "check": "필터 세척 주기와 자동 세척 기능은 이 제품 자료로 확인되지 않았어요.",
+        "pro": "필터 청소는 가끔이에요. 매 끼니 설거지보다 훨씬 드물어요!",
+        "con": "필터에 남은 음식물 찌꺼기는 손으로 꺼내야 해요. 냄새 관리도 신경 쓰이지 않을까요?",
+        "q": "가끔 필터를 꺼내 씻는 건 괜찮나요?",
+        "ok": "괜찮아요",
+        "no": "손대기 싫어요",
+        "ok_text": "가끔 필터 세척을 할 수 있다면, 이 부담은 결정적이지 않아요.",
+        "ok_reason": "사용자가 필터 세척을 감수할 수 있다고 답했어요.",
+        "no_mode": "con_add",
+        "no_text": "필터 세척을 미루면 냄새가 생기기 쉬워요. 관리 알림이나 자동 세척이 있는지 확인해 보세요.",
+    },
+    "dr_cycle": {
+        "assume": "세탁이 끝나면 빨래를 바로 건조기로 옮긴다고 가정",
+        "check": "1회 건조 시간과 이 제품의 전기 사용량은 자료로 확인되지 않았어요.",
+        "pro": "빨래 널고 걷는 일이 사라져요! 비 오는 날 걱정도 없고요.",
+        "con": "세탁 끝나고 바로 못 옮기면 냄새나 구김이 생길 수 있어요. 바로 옮길 수 있으세요?",
+        "q": "세탁이 끝나면 바로 건조기로 옮길 수 있나요?",
+        "ok": "대부분 가능해요",
+        "no": "자주 못 해요",
+        "ok_text": "바로 옮길 수 있다면, 이 걱정은 크지 않아요.",
+        "ok_reason": "사용자가 대부분 바로 옮길 수 있다고 답했어요.",
+        "no_mode": "con_add",
+        "no_text": "자주 못 옮긴다면 세탁기에 빨래가 오래 남아요. 예약·연동 기능이 있는지 확인해 보세요.",
+    },
+    "dr_constraint": {
+        "assume": "니트·울·기능성 옷처럼 건조기에 넣기 어려운 옷이 섞여 있다고 가정",
+        "check": "옷감별 전용 코스 지원 여부는 이 제품 자료로 확인되지 않았어요.",
+        "pro": "수건·속옷·티셔츠 같은 일상 빨래는 거의 다 맡길 수 있어요!",
+        "con": "니트나 울은 줄어들 수 있어요. 결국 일부는 따로 널어야 하지 않을까요?",
+        "q": "건조기에 못 넣는 옷은 따로 널어도 괜찮나요?",
+        "ok": "괜찮아요",
+        "no": "다 넣고 싶어요",
+        "ok_text": "일부만 따로 널어도 괜찮다면, 이 단점은 작아져요.",
+        "ok_reason": "사용자가 일부 옷은 따로 널어도 된다고 답했어요.",
+        "no_mode": "pro_revise",
+        "no_text": "모든 옷을 맡기고 싶다면 그건 장담 못 해요. 옷감별 코스가 있는지 먼저 확인해 보세요.",
+        "no_reason": "사용자가 모든 옷을 넣고 싶다고 해서, 편익을 일상 빨래로 좁혔어요.",
+    },
+    "dr_maintenance": {
+        "assume": "건조할 때마다 먼지 필터를 비우고, 물통이 있다면 직접 버린다고 가정",
+        "check": "배수관 연결 가능 여부와 필터 자동 세척 기능은 확인되지 않았어요.",
+        "pro": "필터 비우기는 금방이에요. 빨래 너는 시간에 비하면 훨씬 짧아요!",
+        "con": "매번 필터를 비우고 물통도 버려야 할 수 있어요. 깜빡하면 건조가 잘 안 되지 않을까요?",
+        "q": "건조할 때마다 필터·물통 비우기, 괜찮나요?",
+        "ok": "괜찮아요",
+        "no": "부담돼요",
+        "ok_text": "매번 비우기를 감당할 수 있다면, 이 부담은 결정적이지 않아요.",
+        "ok_reason": "사용자가 매번 비우기를 감수할 수 있다고 답했어요.",
+        "no_mode": "con_add",
+        "no_text": "매번 비우기가 부담이면, 배수관 직결이 되는 설치 환경인지 먼저 확인해 보세요.",
+    },
+    "ap_run": {
+        "assume": "거실에 두고 하루 대부분 켜 둔다고 가정",
+        "check": "이 제품의 실제 정화 면적과 전기 사용량은 확인되지 않았어요.",
+        "pro": "켜 두기만 하면 공기를 알아서 관리해요! 신경 쓸 일이 적어요.",
+        "con": "거실 크기에 비해 작으면 효과가 덜할 수 있어요. 둘 자리는 충분한가요?",
+        "q": "거실에 공기청정기 둘 자리가 넉넉한가요?",
+        "ok": "넉넉해요",
+        "no": "좀 좁아요",
+        "ok_text": "자리가 넉넉하다면, 놓을 곳 걱정은 빼도 되겠어요.",
+        "ok_reason": "사용자가 둘 자리가 넉넉하다고 답했어요. 정화 면적은 여전히 확인 필요예요.",
+        "no_mode": "con_add",
+        "no_text": "자리가 좁으면 벽에 붙여 두게 되고, 공기 흐름이 막힐 수 있어요. 제품 크기를 꼭 재 보세요.",
+    },
+    "ap_night": {
+        "assume": "불을 끈 침실에서 밤새 켜 둔다고 가정",
+        "check": "수면 모드의 실제 소음 크기와 표시등 끄기 기능은 확인되지 않았어요.",
+        "pro": "자는 동안에도 공기를 관리해 줘요! 아침 공기가 달라질 수 있어요.",
+        "con": "작은 소음이나 불빛에도 잠을 설치는 편이라면, 그게 거슬리지 않을까요?",
+        "q": "잘 때 작은 소리나 불빛에 예민한 편인가요?",
+        "ok": "별로 안 예민해요",
+        "no": "예민해요",
+        "ok_text": "소리·불빛에 예민하지 않다면, 밤 사용 걱정은 작아요.",
+        "ok_reason": "사용자가 소리·불빛에 예민하지 않다고 답했어요.",
+        "no_mode": "pro_revise",
+        "no_text": "예민하다면 밤에는 장점이 줄어요. 수면 모드 소음과 조명 끄기를 꼭 확인해 보세요.",
+        "no_reason": "사용자가 소리·불빛에 예민하다고 해서, 밤 사용 편익을 조건부로 좁혔어요.",
+    },
+    "ap_filter": {
+        "assume": "필터를 정해진 주기마다 새것으로 바꾼다고 가정",
+        "check": "필터 교체 주기와 필터 가격은 이 제품 자료로 확인되지 않았어요.",
+        "pro": "필터만 바꿔 주면 깨끗한 공기를 계속 유지할 수 있어요!",
+        "con": "필터 값이 계속 나가요. 교체 시기를 놓치면 효과도 떨어지지 않을까요?",
+        "q": "필터 교체 비용을 꾸준히 낼 수 있나요?",
+        "ok": "괜찮아요",
+        "no": "부담돼요",
+        "ok_text": "유지비를 감당할 수 있다면, 이 부담은 결정적이지 않아요.",
+        "ok_reason": "사용자가 필터 비용을 감수할 수 있다고 답했어요.",
+        "no_mode": "con_add",
+        "no_text": "유지비가 부담이면, 필터 가격과 교체 주기를 구매 전에 꼭 비교해 보세요.",
+    },
+}
+
+
+def _scripted(scene_id: str, reason: str, answer: str | None) -> Hearing:
+    sc = SCRIPTS[scene_id]
     evidence = [
         Evidence(id="e_reason", kind="user_statement", text=f"구매 이유: “{reason}”"),
-        Evidence(id="e_scene", kind="assumption", text="이 장면의 조건이 내 생활에도 해당한다고 가정"),
-        Evidence(id="e_spec", kind="unverified", text="관련 사양과 관리 방법은 아직 제품 자료로 확인되지 않았어요."),
+        Evidence(id="e_scene", kind="assumption", text=sc["assume"]),
+        Evidence(id="e_check", kind="unverified", text=sc["check"]),
     ]
     claims = [
-        Claim(id="c_pro_1", side="pro", text="이 장면에서 기대하는 편익은 구매 이유와 연결돼요.", evidence_ids=["e_reason"]),
-        Claim(id="c_con_1", side="con", text="장면의 조건과 관리 부담이 실제로도 감당할 만한지는 자료 확인이 필요해요.",
-              evidence_ids=["e_scene", "e_spec"], replies_to="c_pro_1"),
+        Claim(id="c_pro_1", side="pro", text=sc["pro"], evidence_ids=["e_reason"]),
+        Claim(id="c_con_1", side="con", text=sc["con"], evidence_ids=["e_scene", "e_check"], replies_to="c_pro_1"),
     ]
-    return Hearing(scene_id=scene_id, mode="mock", evidence=evidence, claims=claims, question=None, answered=None)
+    question = Question(id=f"q_{scene_id}", text=sc["q"],
+                        options=[Option(id="ok", label=sc["ok"]), Option(id="no", label=sc["no"])])
+    if answer in ("ok", "no"):
+        evidence.append(Evidence(id="e_ans", kind="user_statement", text=f"사용자 답: {sc[answer]}"))
+        if answer == "ok":
+            claims[1] = claims[1].model_copy(update={
+                "text": sc["ok_text"], "evidence_ids": ["e_scene", "e_check", "e_ans"],
+                "status": "revised", "change_reason": sc["ok_reason"]})
+        elif sc["no_mode"] == "pro_revise":
+            claims[0] = claims[0].model_copy(update={
+                "text": sc["no_text"], "evidence_ids": ["e_reason", "e_ans", "e_check"],
+                "status": "revised", "change_reason": sc["no_reason"]})
+        else:
+            claims.append(Claim(id="c_con_2", side="con", text=sc["no_text"],
+                                evidence_ids=["e_ans", "e_check"], replies_to="c_con_1"))
+    return Hearing(scene_id=scene_id, mode="mock", evidence=evidence, claims=claims, question=question, answered=answer)
 
 
 MOCK_ANSWERS = (None, "ok", "no", "skip")
@@ -172,12 +339,12 @@ def check_scene(req: HearingRequest) -> None:
 
 def mock_hearing(req: HearingRequest) -> Hearing:
     check_scene(req)
+    if req.answer not in MOCK_ANSWERS:
+        raise HearingError("없는 선택지예요.")
     if req.scene_id == "rv_clutter":
-        if req.answer not in MOCK_ANSWERS:
-            raise HearingError("없는 선택지예요.")
         h = _rv_clutter(req.reason, req.answer)
     else:
-        h = _generic(req.scene_id, req.reason)
+        h = _scripted(req.scene_id, req.reason, req.answer)
     validate(h, set(req.source_ids))
     return h
 

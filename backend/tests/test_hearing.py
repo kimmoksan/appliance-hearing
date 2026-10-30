@@ -1,7 +1,7 @@
 import pytest
 from fastapi.testclient import TestClient
 
-from app.hearing import Claim, Evidence, Hearing, HearingError, validate
+from app.hearing import SCENE_IDS, Claim, Evidence, Hearing, HearingError, validate
 from app.main import app
 
 client = TestClient(app)
@@ -42,9 +42,17 @@ def test_rejects_scene_of_other_category_and_unknown_answer():
     assert post(answer="maybe").status_code == 422
 
 
-def test_every_scene_has_a_valid_hearing():
-    for cat, scene in [("dishwasher", "dw_load"), ("dryer", "dr_cycle"), ("air_purifier", "ap_night"), ("robot_vacuum", "rv_daily")]:
-        assert post(category=cat, scene_id=scene).status_code == 200
+@pytest.mark.parametrize("cat, scene", [(c.value, s) for c, ids in SCENE_IDS.items() for s in ids])
+def test_every_scene_has_question_and_answers_update_claims(cat, scene):
+    base = post(category=cat, scene_id=scene).json()
+    assert base["question"] and [o["id"] for o in base["question"]["options"]] == ["ok", "no"]
+    assert {e["kind"] for e in base["evidence"]} >= {"assumption", "unverified"}  # 조건은 가정, 성능은 확인 필요
+    ok = post(category=cat, scene_id=scene, answer="ok").json()
+    assert any(c["status"] == "revised" and c["change_reason"] for c in ok["claims"])
+    no = post(category=cat, scene_id=scene, answer="no").json()
+    assert no["claims"] != base["claims"] and any(e["kind"] == "unverified" for e in no["evidence"])
+    sides = {c["id"]: c["side"] for c in base["claims"]}
+    assert all(sides.get(c["id"], c["side"]) == c["side"] for c in ok["claims"] + no["claims"])  # 편이 바뀌지 않음
 
 
 def _h(claims, evidence=None):
