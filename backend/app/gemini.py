@@ -10,8 +10,19 @@ import httpx
 URL = "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
 TIMEOUT = 25.0
 RETRY_STATUS = {500, 502, 503, 504}  # 429(한도)는 바로 다시 보내도 소용없고 한도만 깎는다
-# shortcut: 태평양 표준시 고정(UTC-8). 서머타임 땐 실제 초기화보다 1시간 늦게 풀린다. Windows엔 tzdata가 없어 ZoneInfo 못 씀.
-PACIFIC = timezone(timedelta(hours=-8))
+
+
+def pacific_day(now: datetime | None = None) -> str:
+    """Google 무료 한도 기준 날짜(미국 태평양 시간). Windows엔 tzdata가 없어 미국 서머타임 규칙을 직접 계산한다."""
+    now = now or datetime.now(timezone.utc)
+    y = now.year
+    # 서머타임: 3월 둘째 일요일 02:00 PST(=10:00 UTC) ~ 11월 첫째 일요일 02:00 PDT(=09:00 UTC)
+    march = datetime(y, 3, 8, 10, tzinfo=timezone.utc)
+    start = march + timedelta(days=(6 - march.weekday()) % 7)
+    nov = datetime(y, 11, 1, 9, tzinfo=timezone.utc)
+    end = nov + timedelta(days=(6 - nov.weekday()) % 7)
+    offset = -7 if start <= now < end else -8
+    return (now + timedelta(hours=offset)).date().isoformat()
 
 
 class GeminiError(RuntimeError):
@@ -26,7 +37,7 @@ _usage = {"day": "", "count": 0, "exhausted": False}
 def _take_quota() -> None:
     """하루 호출 상한(GEMINI_DAILY_LIMIT, 기본 15)을 넘거나 Google 한도(429)를 이미 맞았으면 보내지 않는다."""
     limit = int(os.getenv("GEMINI_DAILY_LIMIT", "15"))
-    day = datetime.now(PACIFIC).date().isoformat()  # Google 무료 한도는 태평양 시간 자정에 초기화
+    day = pacific_day()  # Google 무료 한도는 태평양 시간 자정에 초기화
     with _lock:
         if _usage["day"] != day:
             _usage.update(day=day, count=0, exhausted=False)

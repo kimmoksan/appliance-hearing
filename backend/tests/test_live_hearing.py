@@ -116,3 +116,12 @@ def test_daily_limit_and_429_stop_calls(monkeypatch):
     with pytest.raises(GeminiError):
         generate_json("d")  # 429 이후 그날은 더 보내지 않음
     assert len(calls) == 2
+
+
+def test_pacific_day_follows_us_daylight_saving():
+    from datetime import datetime, timezone
+    utc = lambda *a: datetime(*a, tzinfo=timezone.utc)
+    assert gemini.pacific_day(utc(2026, 10, 30, 6, 59)) == "2026-10-29"  # PDT 자정 전
+    assert gemini.pacific_day(utc(2026, 10, 30, 7, 0)) == "2026-10-30"   # PDT 자정(07:00 UTC)
+    assert gemini.pacific_day(utc(2026, 12, 1, 7, 59)) == "2026-11-30"   # 겨울엔 08:00 UTC
+    assert gemini.pacific_day(utc(2026, 12, 1, 8, 0)) == "2026-12-01"
