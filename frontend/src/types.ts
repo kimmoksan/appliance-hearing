@@ -36,3 +36,31 @@ export type Product = {
   sources: Source[]
   notices: string[]
 }
+
+export type EvidenceKind = 'product_fact' | 'user_statement' | 'assumption' | 'unverified'
+export type Evidence = { id: string; kind: EvidenceKind; text: string; source_id: string | null }
+export type Claim = {
+  id: string
+  side: 'pro' | 'con'
+  text: string
+  evidence_ids: string[]
+  replies_to: string | null
+  status: 'kept' | 'revised' | 'withdrawn'
+  change_reason: string | null
+}
+export type Question = { id: string; text: string; options: { id: string; label: string }[] }
+export type Hearing = {
+  scene_id: string
+  mode: 'mock' | 'live'
+  evidence: Evidence[]
+  claims: Claim[]
+  question: Question | null
+  answered: string | null
+}
+export type HearingRequest = {
+  category: Category
+  scene_id: string
+  reason: string
+  source_ids: string[]
+  answer: string | null
+}

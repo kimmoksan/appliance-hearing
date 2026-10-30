@@ -26,7 +26,8 @@ def test_answer_ok_revises_con_with_reason_and_keeps_unverified():
     body = post(answer="ok").json()
     con = body["claims"][1]
     assert con["status"] == "revised" and con["change_reason"]
-    assert any(e["kind"] == "unverified" for e in body["evidence"])  # 감수 의사가 제품 사실을 바꾸지 않음
+    # 감수 의사가 제품 사실을 바꾸지 않음: 수정된 주장도 미확인 근거를 계속 인용
+    assert "e_obstacle" in con["evidence_ids"]
 
 
 def test_answer_no_adds_followup_and_skip_changes_nothing():

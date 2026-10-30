@@ -15,7 +15,7 @@ export default function App() {
   const [input, setInput] = useState<IntakeInput>(EMPTY)
   const [product, setProduct] = useState<Product | null>(null)
   const [started, setStarted] = useState(false)
-  const [hearing, setHearing] = useState<string | null>(null)
+  const [finished, setFinished] = useState(false)
   const [busy, setBusy] = useState(false)
   const [errors, setErrors] = useState<FieldErrors>({})
   const [message, setMessage] = useState<string | null>(null)
@@ -52,7 +52,7 @@ export default function App() {
     setInput(EMPTY)
     setProduct(null)
     setStarted(false)
-    setHearing(null)
+    setFinished(false)
     setErrors({})
     setMessage(null)
   }
@@ -68,15 +68,15 @@ export default function App() {
         {health && <span className="badge">{MODE_LABEL[health.mode]}</span>}
       </header>
       <main>
-        {product && started && hearing ? (
-          // shortcut: 청문회 화면은 feature/hearing에서. 그 전까지 자리표시.
+        {product && started && finished ? (
+          // shortcut: 결과 화면은 feature/decision-summary에서. 그 전까지 자리표시.
           <section className="check">
-            <h1>청문회는 준비 중이에요</h1>
-            <p className="muted">선택한 상황({hearing})의 찬반 공방은 다음 단계에서 만들어요.</p>
-            <button type="button" className="link" onClick={() => setHearing(null)}>← 상황으로 돌아가기</button>
+            <h1>결과 화면은 준비 중이에요</h1>
+            <p className="muted">이득·불편·확인할 것 정리와 나의 결정은 다음 단계에서 만들어요.</p>
+            <button type="button" className="link" onClick={() => setFinished(false)}>← 청문회로 돌아가기</button>
           </section>
         ) : product && started ? (
-          <Scenes product={product} onBack={() => setStarted(false)} onHearing={setHearing} />
+          <Scenes product={product} onBack={() => setStarted(false)} onFinish={() => setFinished(true)} />
         ) : product ? (
           <ProductCheck
             key={input.product_text + product.reason}

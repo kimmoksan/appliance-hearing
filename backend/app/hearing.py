@@ -112,7 +112,7 @@ def _rv_clutter(reason: str, answer: str | None) -> Hearing:
     if answer == "ok":
         evidence.append(Evidence(id="e_ans", kind="user_statement", text="사용자: 바닥을 미리 정리하는 건 괜찮다"))
         claims[1] = claims[1].model_copy(update={
-            "text": "정리 부담은 남지만, 이 사용자에게 결정적인 단점에서는 제외해요.", "evidence_ids": ["e_floor", "e_ans"],
+            "text": "정리 부담은 남지만, 이 사용자에게 결정적인 단점에서는 제외해요.", "evidence_ids": ["e_floor", "e_obstacle", "e_ans"],
             "status": "revised", "change_reason": "사용자가 사전 정리를 감수할 수 있다고 답했어요. 제품의 장애물 대응 정보는 여전히 확인 필요예요.",
         })
     elif answer == "no":

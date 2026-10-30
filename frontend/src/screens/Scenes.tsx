@@ -1,16 +1,20 @@
 import { useState } from 'react'
 import Stage from '../components/Stage'
+import HearingPanel from './HearingPanel'
 import { SCENES } from '../scenes'
 import type { Product } from '../types'
 
-type Props = { product: Product; onBack: () => void; onHearing: (sceneId: string) => void }
+type Props = { product: Product; onBack: () => void; onFinish: () => void }
 
 const prefersReducedMotion = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
 
-export default function Scenes({ product, onBack, onHearing }: Props) {
+export default function Scenes({ product, onBack, onFinish }: Props) {
   const scenes = SCENES[product.category]
   const [index, setIndex] = useState(0)
   const [paused, setPaused] = useState(prefersReducedMotion)
+  const [view, setView] = useState<'scene' | 'hearing'>('scene')
+  // 장면별 질문 답변. 장면을 오가도 유지된다(탭 상태).
+  const [answers, setAnswers] = useState<Record<string, string>>({})
 
   const scene = scenes[index]
   return (
@@ -21,8 +25,25 @@ export default function Scenes({ product, onBack, onHearing }: Props) {
           <span className="tag outline">조건부 예시</span>
           <span className="tag outline">예시 장면 · AI 구성 아님</span>
         </p>
-        <h1>{scene.title}</h1>
+        <div className="row between">
+          <h1>{scene.title}</h1>
+          <div className="toggle" role="group" aria-label="보기 전환">
+            <button type="button" aria-pressed={view === 'scene'} onClick={() => setView('scene')}>상황</button>
+            <button type="button" aria-pressed={view === 'hearing'} onClick={() => setView('hearing')}>청문회</button>
+          </div>
+        </div>
       </div>
+
+      {view === 'hearing' ? (
+        <HearingPanel
+          key={scene.id}
+          product={product}
+          sceneId={scene.id}
+          answer={answers[scene.id] ?? null}
+          onAnswer={(a) => setAnswers({ ...answers, [scene.id]: a })}
+          top={<Stage scene={scene} paused={paused} />}
+        />
+      ) : (
 
       <div className="scenes-grid">
         <div className="player">
@@ -62,14 +83,25 @@ export default function Scenes({ product, onBack, onHearing }: Props) {
           <p className="muted small">ⓘ 제품 성능을 재현한 영상이 아닌 가상 상황이에요. 실제 집 구조·축척과 달라요.</p>
         </aside>
       </div>
+      )}
 
       <div className="row between nav-row">
-        <button type="button" className="link" onClick={onBack}>← 제품 확인</button>
+        {view === 'hearing' ? (
+          <button type="button" className="link" onClick={() => setView('scene')}>← 상황 다시 보기</button>
+        ) : (
+          <button type="button" className="link" onClick={onBack}>← 제품 확인</button>
+        )}
         <div className="row">
-          {index < scenes.length - 1 && (
+          {view === 'scene' && index < scenes.length - 1 && (
             <button type="button" className="secondary" onClick={() => setIndex(index + 1)}>다음 상황 건너뛰기</button>
           )}
-          <button type="button" className="primary" onClick={() => onHearing(scene.id)}>이 상황의 찬반 듣기 →</button>
+          {view === 'scene' ? (
+            <button type="button" className="primary" onClick={() => setView('hearing')}>이 상황의 찬반 듣기 →</button>
+          ) : index < scenes.length - 1 ? (
+            <button type="button" className="primary" onClick={() => { setIndex(index + 1); setView('scene') }}>다음 상황 →</button>
+          ) : (
+            <button type="button" className="primary" onClick={onFinish}>결과 보기 →</button>
+          )}
         </div>
       </div>
     </section>
