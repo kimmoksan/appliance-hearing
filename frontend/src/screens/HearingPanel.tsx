@@ -9,6 +9,7 @@ type Props = {
   answer: string | null
   onAnswer: (answer: string) => void
   cached?: Hearing
+  base?: Hearing
   onLoaded: (hearing: Hearing) => void
   top?: ReactNode
 }
@@ -26,7 +27,7 @@ const SIDE = {
 }
 const STATUS = { revised: '주장 수정', withdrawn: '주장 철회' }
 
-export default function HearingPanel({ product, sceneId, answer, onAnswer, cached, onLoaded, top }: Props) {
+export default function HearingPanel({ product, sceneId, answer, onAnswer, cached, base, onLoaded, top }: Props) {
   const [response, setResponse] = useState<{ answer: string | null; hearing?: Hearing; error?: string } | null>(null)
   const [selected, setSelected] = useState<string | null>(null)
   const [retry, setRetry] = useState(0)
@@ -42,7 +43,7 @@ export default function HearingPanel({ product, sceneId, answer, onAnswer, cache
       source_ids: product.sources.filter((s) => s.kind !== 'ai').map((s) => s.id),
       answer,
       facts: product.sources.slice(0, 5).map((s) => ({ source_id: s.id, text: s.text.slice(0, 3000), verified: s.kind !== 'ai' })),
-      previous: answer ? cached ?? null : null,
+      previous: answer ? base ?? cached ?? null : null,
     })
       .then((h) => {
         if (!alive) return
@@ -51,7 +52,7 @@ export default function HearingPanel({ product, sceneId, answer, onAnswer, cache
       })
       .catch((e) => alive && setResponse({ answer, error: e instanceof ApiError ? e.message : '공방을 불러오지 못했어요.' }))
     return () => { alive = false }
-  }, [product, sceneId, answer, retry, cached, onLoaded])
+  }, [product, sceneId, answer, retry, cached, base, onLoaded])
 
   const hearing = cached?.answered === answer ? cached : response?.answer === answer ? response.hearing : undefined
   const error = response?.answer === answer && !hearing ? response.error : undefined

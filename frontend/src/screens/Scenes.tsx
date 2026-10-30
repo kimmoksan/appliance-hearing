@@ -6,14 +6,14 @@ import type { Hearing, Product } from '../types'
 
 type Props = {
   product: Product; onBack: () => void; onFinish: () => void
-  hearings: Record<string, Hearing>; answers: Record<string, string>
+  hearings: Record<string, Hearing>; bases: Record<string, Hearing>; answers: Record<string, string>
   onHearing: (hearing: Hearing) => void; onAnswer: (id: string, answer: string) => void
   index: number; onIndexChange: (index: number) => void; active: boolean
 }
 
 const prefersReducedMotion = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
 
-export default function Scenes({ product, onBack, onFinish, hearings, answers, onHearing, onAnswer, index, onIndexChange, active }: Props) {
+export default function Scenes({ product, onBack, onFinish, hearings, bases, answers, onHearing, onAnswer, index, onIndexChange, active }: Props) {
   const scenes = SCENES[product.category]
   const [paused, setPaused] = useState(prefersReducedMotion)
   // '움직임 멈추기'는 장면뿐 아니라 깡이 들썩임·배경 흔들림까지 멈춘다(계속 움직이는 요소는 사용자가 멈출 수 있어야 함).
@@ -49,6 +49,7 @@ export default function Scenes({ product, onBack, onFinish, hearings, answers, o
           sceneId={scene.id}
           answer={answers[scene.id] ?? null}
           cached={hearings[scene.id]}
+          base={bases[scene.id]}
           onLoaded={onHearing}
           onAnswer={(a) => onAnswer(scene.id, a)}
           top={<Stage scene={scene} paused={paused || !active} />}

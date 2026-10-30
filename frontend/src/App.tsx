@@ -25,14 +25,18 @@ export default function App() {
   const [busy, setBusy] = useState(false)
   const [errors, setErrors] = useState<FieldErrors>({})
   const [message, setMessage] = useState<string | null>(null)
+  // 답하기 전 공방: 답을 바꾸거나 건너뛸 때 이전 답의 흔적 없이 이것을 기준으로 다시 만든다.
+  const [bases, setBases] = useState<Record<string, Hearing>>({})
   const recordHearing = useCallback((hearing: Hearing) => {
     setHearings((previous) => ({ ...previous, [hearing.scene_id]: hearing }))
+    if (hearing.answered === null) setBases((previous) => ({ ...previous, [hearing.scene_id]: hearing }))
   }, [])
 
   function clearReview() {
     setStarted(false)
     setFinished(false)
     setHearings({})
+    setBases({})
     setAnswers({})
     setSceneIndex(0)
     setDecision(EMPTY_DECISION)
@@ -99,7 +103,7 @@ export default function App() {
         {product && started ? (
           <>
             <div hidden={finished}>
-              <Scenes product={product} hearings={hearings} answers={answers} index={sceneIndex}
+              <Scenes product={product} hearings={hearings} bases={bases} answers={answers} index={sceneIndex}
                 onIndexChange={setSceneIndex} onHearing={recordHearing} onAnswer={answerScene} active={!finished}
                 onBack={() => setStarted(false)} onFinish={() => setFinished(true)} />
             </div>

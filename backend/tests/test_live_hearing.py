@@ -125,3 +125,9 @@ def test_pacific_day_follows_us_daylight_saving():
     assert gemini.pacific_day(utc(2026, 10, 30, 7, 0)) == "2026-10-30"   # PDT 자정(07:00 UTC)
     assert gemini.pacific_day(utc(2026, 12, 1, 7, 59)) == "2026-11-30"   # 겨울엔 08:00 UTC
     assert gemini.pacific_day(utc(2026, 12, 1, 8, 0)) == "2026-12-01"
+
+
+def test_skip_returns_previous_without_calling_ai():
+    prev = live_hearing(HearingRequest(**REQ), lambda p: GOOD)
+    h = live_hearing(HearingRequest(**REQ, answer="skip", previous=prev), lambda p: pytest.fail("건너뛰기에 AI 호출"))
+    assert h.answered == "skip" and h.claims == prev.claims and h.mode == "live"
