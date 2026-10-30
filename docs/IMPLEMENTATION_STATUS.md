@@ -68,4 +68,6 @@
 - `./scripts/check.ps1`: lint·타입·빌드 통과, 프론트 요약 테스트 **7 passed**, 백엔드 **43 passed / 기존 경고 1개**. 프론트 검사를 기존 전체 검사·CI에 추가했다. 새 의존성·.env 변경·실제 AI 호출은 없다.
 - 브라우저 확인: 수정 답변과 변경 이유, 건너뛰기의 ‘확인 안 함’ 표시·복사, 답변 변경 시 선택 초기화, 청문회 왕복 시 선택·이유 보존, 새 검토 초기화, 마지막 장면만 보면 1/3과 미확인 장면 표시, 해당 질문으로 돌아가기. 실제 클립보드 복사 성공, 콘솔 오류 없음. 375px 결과 화면 가로 넘침 없음.
 - `docs/catalog/`는 수정·커밋에서 제외한다. 실행은 기존 별도 worktree(`work/catalog`)와 localhost:5173을 계속 사용한다.
-- 미확인: 자동 복사 실패의 브라우저 재현, 전체 접근성·브라우저 조합. 모바일 디자인 개편은 사용자 요청으로 보류했다. 예시 공방 틀의 제한은 그대로이며 실제 AI 요약은 아니다. PR·CI·머지는 이 기록 작성 후 진행한다.
+- 미확인: 자동 복사 실패의 브라우저 재현, 전체 접근성·브라우저 조합. 모바일 디자인 개편은 사용자 요청으로 보류했다. 예시 공방 틀의 제한은 그대로이며 실제 AI 요약은 아니다. 기능 PR [#9](https://github.com/kimmoksan/appliance-hearing/pull/9)은 [CI #16](https://github.com/kimmoksan/appliance-hearing/actions/runs/41011671233)의 frontend·backend 통과 후 develop에 머지했다. 머지 커밋은 `b3f428f`이며 검사한 head `9f0b473`을 지정해 머지했다.
+
+- 통합 기록: 청문회 [#6](https://github.com/kimmoksan/appliance-hearing/pull/6), 카탈로그 선택 [#7](https://github.com/kimmoksan/appliance-hearing/pull/7), 별도 검수 데이터 [#8](https://github.com/kimmoksan/appliance-hearing/pull/8), 결과·사용자 결정 #9 모두 develop에 머지됐다. 이번 기능 PR은 검수 파일 변경 없이 13개 파일만 반영했다.
