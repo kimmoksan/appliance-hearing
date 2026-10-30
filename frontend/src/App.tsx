@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { ApiError, fetchExample, submitIntake, type FieldErrors } from './api'
 import Intro from './screens/Intro'
-import ProductCheck, { Stepper } from './screens/ProductCheck'
+import ProductCheck from './screens/ProductCheck'
+import Scenes from './screens/Scenes'
 import type { IntakeInput, Product } from './types'
 
 type Health = { status: string; mode: 'mock' | 'live' }
@@ -14,6 +15,7 @@ export default function App() {
   const [input, setInput] = useState<IntakeInput>(EMPTY)
   const [product, setProduct] = useState<Product | null>(null)
   const [started, setStarted] = useState(false)
+  const [hearing, setHearing] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   const [errors, setErrors] = useState<FieldErrors>({})
   const [message, setMessage] = useState<string | null>(null)
@@ -50,6 +52,7 @@ export default function App() {
     setInput(EMPTY)
     setProduct(null)
     setStarted(false)
+    setHearing(null)
     setErrors({})
     setMessage(null)
   }
@@ -65,14 +68,15 @@ export default function App() {
         {health && <span className="badge">{MODE_LABEL[health.mode]}</span>}
       </header>
       <main>
-        {product && started ? (
-          // shortcut: 상황 화면은 feature/scene-player에서. 그 전까지 자리표시.
+        {product && started && hearing ? (
+          // shortcut: 청문회 화면은 feature/hearing에서. 그 전까지 자리표시.
           <section className="check">
-            <Stepper current={2} />
-            <h1>사용 상황은 준비 중이에요</h1>
-            <p className="muted">상황 화면은 다음 단계에서 만들어요. 확인한 제품 정보는 그대로 있어요.</p>
-            <button type="button" className="link" onClick={() => setStarted(false)}>← 제품 확인으로 돌아가기</button>
+            <h1>청문회는 준비 중이에요</h1>
+            <p className="muted">선택한 상황({hearing})의 찬반 공방은 다음 단계에서 만들어요.</p>
+            <button type="button" className="link" onClick={() => setHearing(null)}>← 상황으로 돌아가기</button>
           </section>
+        ) : product && started ? (
+          <Scenes product={product} onBack={() => setStarted(false)} onHearing={setHearing} />
         ) : product ? (
           <ProductCheck
             key={input.product_text + product.reason}
