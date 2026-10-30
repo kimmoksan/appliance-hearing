@@ -15,7 +15,7 @@ TIMEOUT_SEC = 8
 MAX_BYTES = 1_000_000
 MAX_REDIRECTS = 3
 TEXT_MAX = 5000
-USER_AGENT = "Mozilla/5.0 (compatible; appliance-hearing/0.1)"
+USER_AGENT = "Mozilla/5.0 (compatible; salkkang-malkkang/0.1)"
 
 
 class LinkError(Exception):

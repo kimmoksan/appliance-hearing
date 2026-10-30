@@ -6,13 +6,13 @@
 
 | 프로젝트 개발자 | 프로젝트명 | 프로젝트 범위 | 프로젝트 개발 배경 | 프로젝트 기술스택 | 프로젝트 깃허브 주소 |
 |---|---|---|---|---|---|
-| [제출자 실명 입력] | 살깡말깡 — 가전 살까 말까 청문회 | 개인 프로젝트. 로봇청소기·식기세척기·건조기·공기청정기 4개 제품군. 검수한 제조사 공식 카탈로그(삼성·LG 24개 모델) 선택 또는 직접 입력과 구매 이유 한 줄로 시작해, 제품군별 사용 상황 3개를 도트 장면으로 보여 주고, 찬성 캐릭터 살깡이·반대 캐릭터 말깡이가 근거를 인용하며 공방하고 진행자 판깡이가 선택형 질문을 던진다. 사용자의 답에 따라 주장이 수정·철회되며, 마지막에 이득·불편·확인 필요를 정리하고 사용자가 직접 ‘살래요/보류/안 살래요’를 고르는 웹 MVP | 가전제품의 사양과 장단점을 자신의 생활에 연결해 판단하기 어려운 문제를 해결하고자 기획했다. AI가 구매 판결을 내리는 대신, 제품 사실·사용자 진술·가정·확인 필요를 구분한 근거 위에서 편익과 불편을 상황별로 드러내고, 사용자가 감수할 단점을 스스로 판단해 결정하도록 돕는다. | 프론트: React 19, TypeScript, Vite 8, 일반 CSS(Grid/Flex), 도트 장면은 고정 이미지 + CSS·Web Animations 상태 효과 / 백엔드: Python 3.12, FastAPI, Pydantic, httpx, uv / AI: Google Gemini API(gemini-3.5-flash, 서버 호출, JSON 응답 검증) / 검사: pytest, oxlint, GitHub Actions CI | https://github.com/kimmoksan/appliance-hearing (public) |
+| [제출자 실명 입력] | 살깡말깡 — 가전 살까 말까 청문회 | 개인 프로젝트. 로봇청소기·식기세척기·건조기·공기청정기 4개 제품군. 검수한 제조사 공식 카탈로그(삼성·LG 24개 모델) 선택 또는 직접 입력과 구매 이유 한 줄로 시작해, 제품군별 사용 상황 3개를 도트 장면으로 보여 주고, 찬성 캐릭터 살깡이·반대 캐릭터 말깡이가 근거를 인용하며 공방하고 진행자 판깡이가 선택형 질문을 던진다. 사용자의 답에 따라 주장이 수정·철회되며, 마지막에 이득·불편·확인 필요를 정리하고 사용자가 직접 ‘살래요/보류/안 살래요’를 고르는 웹 MVP | 가전제품의 사양과 장단점을 자신의 생활에 연결해 판단하기 어려운 문제를 해결하고자 기획했다. AI가 구매 판결을 내리는 대신, 제품 사실·사용자 진술·가정·확인 필요를 구분한 근거 위에서 편익과 불편을 상황별로 드러내고, 사용자가 감수할 단점을 스스로 판단해 결정하도록 돕는다. | 프론트: React 19, TypeScript, Vite 8, 일반 CSS(Grid/Flex), 도트 장면은 고정 이미지 + CSS·Web Animations 상태 효과 / 백엔드: Python 3.12, FastAPI, Pydantic, httpx, uv / AI: Google Gemini API(gemini-3.5-flash, 서버 호출, JSON 응답 검증) / 검사: pytest, oxlint, GitHub Actions CI | https://github.com/kimmoksan/salkkang-malkkang (public) |
 
 ## 제출표용 짧은 버전
 
 | 프로젝트명 | 프로젝트 범위 | 프로젝트 개발 배경 | 프로젝트 기술스택 | 프로젝트 깃허브 주소 |
 |---|---|---|---|---|
-| 살깡말깡 (가전 살까 말까 청문회) | 개인 프로젝트 React, FastAPI, Gemini API | 가전 사양과 장단점을 내 생활에 대입해 판단하기 어려워, AI 찬반 캐릭터가 근거로 공방하고 사용자가 직접 구매를 결정하도록 개발 | React, TypeScript, Vite, FastAPI, Gemini API | https://github.com/kimmoksan/appliance-hearing |
+| 살깡말깡 (가전 살까 말까 청문회) | 개인 프로젝트 React, FastAPI, Gemini API | 가전 사양과 장단점을 내 생활에 대입해 판단하기 어려워, AI 찬반 캐릭터가 근거로 공방하고 사용자가 직접 구매를 결정하도록 개발 | React, TypeScript, Vite, FastAPI, Gemini API | https://github.com/kimmoksan/salkkang-malkkang |
 
 ## 구현한 기능
 
