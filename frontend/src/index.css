@@ -176,6 +176,9 @@ button:disabled { opacity: 0.6; cursor: wait; }
 .source p { margin: 4px 0 0; }
 .raw { white-space: pre-wrap; word-break: break-word; background: var(--bg); padding: 12px; border-radius: 8px; margin: 12px 0 0; max-height: 240px; overflow: auto; }
 .nav-row { margin-top: 8px; }
+.source + .source { margin-top: 8px; }
+.url { color: var(--accent); word-break: break-all; }
+.add-info summary { cursor: pointer; }
 
 @media (max-width: 768px) {
   .check-grid { grid-template-columns: 1fr; }

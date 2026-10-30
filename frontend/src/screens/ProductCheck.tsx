@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { FieldErrors } from '../api'
-import { CATEGORIES, type Product } from '../types'
+import { CATEGORIES, type Product, type Source } from '../types'
 
 type Props = {
   product: Product
@@ -13,7 +13,14 @@ type Props = {
   onAddInfo: (text: string) => void
 }
 
-const SOURCE_LABEL = { user_input: '입력한 자료', example: '예시 자료' }
+const SOURCE_LABEL = { user_input: '입력한 자료', example: '예시 자료', link: '링크 자료' }
+
+function sourceNote(s: Source) {
+  const at = new Date(s.received_at).toLocaleString('ko-KR')
+  if (s.kind === 'example') return '서비스가 준비한 예시 자료예요. 실제 제품 정보가 아니에요.'
+  if (s.kind === 'link') return `입력한 링크에서 읽은 페이지 내용 · ${at}`
+  return `사용자가 직접 입력한 내용 · ${at} 입력`
+}
 
 export function Stepper({ current }: { current: 1 | 2 | 3 }) {
   return (
@@ -32,8 +39,11 @@ export default function ProductCheck({ product, busy, errors, message, onBack, o
   const [editing, setEditing] = useState(false)
   const [reason, setReason] = useState(product.reason)
   const [extra, setExtra] = useState('')
-  const [showRaw, setShowRaw] = useState(false)
-  const source = product.sources[0]
+  const [openRaw, setOpenRaw] = useState<string | null>(null)
+  const sourceTag = (id: string | null) => {
+    const kind = product.sources.find((x) => x.id === id)?.kind
+    return kind ? SOURCE_LABEL[kind] : '자료 없음'
+  }
   const category = CATEGORIES.find((c) => c.id === product.category)?.label
 
   return (
@@ -94,41 +104,49 @@ export default function ProductCheck({ product, busy, errors, message, onBack, o
                 <tr key={s.key}>
                   <th scope="row">{s.label}</th>
                   <td>{s.value ?? <span className="muted">확인 필요</span>}</td>
-                  <td><span className="tag outline small">{s.source_id ? SOURCE_LABEL[source.kind] : '자료 없음'}</span></td>
+                  <td><span className="tag outline small">{sourceTag(s.source_id)}</span></td>
                 </tr>
               ))}
             </tbody>
           </table>
 
-          <div className="source">
-            <div className="row between">
-              <div>
-                <strong>{product.is_example ? '예시 제품 자료' : '입력한 제품 자료'}</strong>
-                <p className="muted small">
-                  {product.is_example
-                    ? '서비스가 준비한 예시 자료예요. 실제 제품 정보가 아니에요.'
-                    : `사용자가 직접 입력한 내용 · ${new Date(source.received_at).toLocaleString('ko-KR')} 입력`}
-                </p>
+          {product.sources.length === 0 && <p className="muted small">확보한 자료가 없어요.</p>}
+          {product.sources.map((s) => (
+            <div className="source" key={s.id}>
+              <div className="row between">
+                <div>
+                  <strong>{SOURCE_LABEL[s.kind]}</strong>
+                  <p className="muted small">{sourceNote(s)}</p>
+                  {s.url && (
+                    <a className="small url" href={s.url} target="_blank" rel="noopener noreferrer">{s.url}</a>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  className="link"
+                  aria-expanded={openRaw === s.id}
+                  onClick={() => setOpenRaw(openRaw === s.id ? null : s.id)}
+                >
+                  {openRaw === s.id ? '원문 닫기' : '원문 보기'}
+                </button>
               </div>
-              <button type="button" className="link" aria-expanded={showRaw} onClick={() => setShowRaw(!showRaw)}>
-                {showRaw ? '원문 닫기' : '원문 보기'}
-              </button>
+              {openRaw === s.id && <pre className="raw">{s.text}</pre>}
             </div>
-            {showRaw && <pre className="raw">{source.text}</pre>}
-          </div>
+          ))}
         </article>
       </div>
 
       {product.is_example ? (
         <p className="muted">예시 제품은 수정할 수 없어요. 내 제품으로 해 보려면 돌아가서 직접 입력하세요.</p>
       ) : (
-        <div className="card add-info">
-          <label htmlFor="extra"><strong>제품 정보 붙여넣기</strong></label>
+        <details className="card add-info" open={product.sources.length === 0}>
+          <summary><strong>제품 정보 붙여넣기</strong> <span className="muted small">(선택)</span></summary>
+          <label htmlFor="extra" className="sr-only">제품 정보 붙여넣기</label>
           <textarea
             id="extra"
             rows={3}
             maxLength={5000}
-            placeholder="공식 홈페이지·상세 페이지에서 복사한 모델명, 주요 사양, 구성품, 크기 등을 붙여넣어 주세요."
+            placeholder="링크로 부족하면 공식 홈페이지·상세 페이지의 모델명, 주요 사양, 구성품, 크기 등을 붙여넣어 주세요."
             value={extra}
             onChange={(e) => setExtra(e.target.value)}
           />
@@ -136,7 +154,7 @@ export default function ProductCheck({ product, busy, errors, message, onBack, o
           <button type="button" className="secondary small" disabled={busy || !extra.trim()} onClick={() => onAddInfo(extra)}>
             자료 추가
           </button>
-        </div>
+        </details>
       )}
 
       {message && <p className="form-error" role="alert">{message}</p>}

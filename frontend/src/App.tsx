@@ -75,7 +75,7 @@ export default function App() {
           </section>
         ) : product ? (
           <ProductCheck
-            key={product.sources[0].text + product.reason}
+            key={input.product_text + product.reason}
             product={product}
             busy={busy}
             errors={errors}
@@ -84,7 +84,7 @@ export default function App() {
             onStart={() => setStarted(true)}
             onUpdateReason={(reason) => submit({ ...input, reason })}
             onAddInfo={(text) =>
-              submit({ ...input, product_text: product.link_only ? text : `${input.product_text}\n\n${text}` })
+              submit({ ...input, product_text: `${input.product_text}\n\n${text}` })
             }
           />
         ) : (

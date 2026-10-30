@@ -1,6 +1,7 @@
 """제품 입력 검증과 제품 확인용 레코드 생성.
 
-AI 연동 전 단계: 사용자가 준 텍스트를 그대로 출처로 보관하고, 스펙 값은 추측하지 않는다(모두 '확인 필요').
+AI 연동 전 단계: 링크 본문과 사용자 텍스트를 출처로 보관하고, 스펙 값은 추측하지 않는다(모두 '확인 필요').
+첫 줄이 링크면 그 페이지를 읽고, 나머지 줄은 사용자가 덧붙인 자료로 본다.
 """
 
 from datetime import datetime, timezone
@@ -8,6 +9,8 @@ from enum import Enum
 from typing import Literal
 
 from pydantic import BaseModel, Field, field_validator
+
+from app.link_reader import LinkError, is_url, read_link
 
 
 class Category(str, Enum):
@@ -54,8 +57,9 @@ class Spec(BaseModel):
 
 class Source(BaseModel):
     id: str
-    kind: Literal["user_input", "example"]
+    kind: Literal["user_input", "example", "link"]
     text: str
+    url: str | None = None
     received_at: str
 
 
@@ -63,33 +67,39 @@ class Product(BaseModel):
     category: Category
     name: str
     is_example: bool
-    link_only: bool
+    link: str | None
+    link_read: bool
     reason: str
     specs: list[Spec]
     sources: list[Source]
     notices: list[str]
 
 
-def _is_link_only(text: str) -> bool:
-    return " " not in text and "\n" not in text and text.lower().startswith(("http://", "https://"))
-
-
 def build_product(req: IntakeRequest, *, is_example: bool = False) -> Product:
-    text = req.product_text
-    link_only = _is_link_only(text)
-    notices = []
-    if link_only:
-        # shortcut: 링크 본문 읽기 미구현(지원 사이트 미정). 사이트를 정하면 URL 보호와 함께 추가.
-        notices.append("링크 내용은 아직 읽지 않아요. 제품 페이지의 모델명·사양을 복사해 붙여넣어 주세요.")
-        name = "링크로 입력한 제품"
-    else:
-        name = text.splitlines()[0].strip()[:NAME_MAX]
-    source = Source(
-        id="src_1",
-        kind="example" if is_example else "user_input",
-        text=text,
-        received_at=datetime.now(timezone.utc).isoformat(timespec="seconds"),
-    )
+    now = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    first, _, rest = req.product_text.partition("\n")
+    first, rest = first.strip(), rest.strip()
+    link = first if is_url(first) else None
+    user_text = rest if link else req.product_text
+
+    sources: list[Source] = []
+    notices: list[str] = []
+    name = ""
+    if link:
+        try:
+            page_name, page_text = read_link(link)
+            sources.append(Source(id=f"src_{len(sources) + 1}", kind="link", text=page_text, url=link, received_at=now))
+            name = page_name
+            notices.append("링크에서 읽은 내용이에요. 사양은 아직 확인 전이라 ‘확인 필요’로 둬요.")
+        except LinkError as e:
+            notices.append(f"링크를 읽지 못했어요: {e} 필요하면 제품 정보를 붙여넣어 주세요(선택).")
+    if user_text:
+        sources.append(Source(
+            id=f"src_{len(sources) + 1}", kind="example" if is_example else "user_input", text=user_text, received_at=now,
+        ))
+        name = name or user_text.splitlines()[0].strip()
+    name = (name or "링크로 입력한 제품")[:NAME_MAX]
+
     specs = [
         Spec(key=k, label=label, value=None, status="needs_check", source_id=None)
         for k, label in SPEC_FIELDS[req.category]
@@ -98,10 +108,11 @@ def build_product(req: IntakeRequest, *, is_example: bool = False) -> Product:
         category=req.category,
         name=name,
         is_example=is_example,
-        link_only=link_only,
+        link=link,
+        link_read=any(s.kind == "link" for s in sources),
         reason=req.reason,
         specs=specs,
-        sources=[source],
+        sources=sources,
         notices=notices,
     )
 

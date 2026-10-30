@@ -17,13 +17,20 @@ export type Spec = {
   source_id: string | null
 }
 
-export type Source = { id: string; kind: 'user_input' | 'example'; text: string; received_at: string }
+export type Source = {
+  id: string
+  kind: 'user_input' | 'example' | 'link'
+  text: string
+  url: string | null
+  received_at: string
+}
 
 export type Product = {
   category: Category
   name: string
   is_example: boolean
-  link_only: boolean
+  link: string | null
+  link_read: boolean
   reason: string
   specs: Spec[]
   sources: Source[]
