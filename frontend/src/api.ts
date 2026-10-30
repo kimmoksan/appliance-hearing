@@ -1,4 +1,4 @@
-import type { Hearing, HearingRequest, IntakeInput, Product } from './types'
+import type { CatalogProduct, Category, Hearing, HearingRequest, IntakeInput, Product } from './types'
 
 export type FieldErrors = Partial<Record<keyof IntakeInput, string>>
 
@@ -14,6 +14,7 @@ const FIELD_MESSAGES: Record<keyof IntakeInput, string> = {
   category: '지원하는 제품군 중에서 골라 주세요.',
   product_text: '제품 정보를 입력해 주세요. (최대 5000자)',
   reason: '구매 이유를 한 줄로 입력해 주세요. (최대 200자)',
+  catalog_model: '목록에서 제품 모델을 선택해 주세요.',
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
@@ -48,5 +49,8 @@ const post = <T>(path: string, data: unknown) =>
 export const submitIntake = (input: IntakeInput) => post<Product>('/api/intake', input)
 
 export const fetchExample = () => request<Product>('/api/example')
+
+export const fetchCatalog = (category: Category) =>
+  request<CatalogProduct[]>(`/api/catalog?category=${encodeURIComponent(category)}`)
 
 export const fetchHearing = (req: HearingRequest) => post<Hearing>('/api/hearing', req)
