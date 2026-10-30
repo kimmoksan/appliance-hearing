@@ -127,7 +127,33 @@ button:disabled { opacity: 0.6; cursor: wait; }
   min-height: clamp(380px, 62vh, 680px);
   border-radius: 12px;
 }
-.intro-art img { width: 100%; height: auto; image-rendering: pixelated; }
+.intro-art { align-content: center; }
+/* 넓은 단면 그림을 16:10 상자 높이에 맞춰 키우고, 넘치는 좌우는 천천히 훑어본다 */
+.house { position: relative; width: 100%; aspect-ratio: 16 / 10; overflow: hidden; border-radius: 12px; }
+.house-track {
+  position: absolute; top: 0; left: 0; height: 100%; aspect-ratio: 520 / 188;
+  animation: pan 24s ease-in-out infinite alternate;
+}
+.house-track img { position: absolute; left: 0; top: -38.83%; width: 100%; image-rendering: pixelated; }
+@keyframes pan { from { left: 0%; } to { left: -72.9%; } }
+.lamp-glow, .lamp-cone, .window-off { position: absolute; pointer-events: none; }
+.lamp-glow {
+  aspect-ratio: 1; transform: translate(-50%, -50%); border-radius: 50%;
+  background: radial-gradient(circle, rgb(255 214 140 / 0.7), rgb(255 190 110 / 0.25) 45%, transparent 70%);
+  mix-blend-mode: screen; animation: glow 4.5s ease-in-out infinite;
+}
+.lamp-cone {
+  aspect-ratio: 1 / 1.6; transform: translateX(-50%);
+  background: linear-gradient(rgb(255 220 150 / 0.45), transparent);
+  clip-path: polygon(38% 0, 62% 0, 100% 100%, 0 100%);
+  mix-blend-mode: screen; animation: glow 4.5s ease-in-out infinite;
+}
+@keyframes glow { 0%, 100% { opacity: 0.75; } 50% { opacity: 1; } 70% { opacity: 0.85; } }
+.window-off {
+  width: 0.77%; aspect-ratio: 1; transform: translate(-50%, -50%); background: #222a52;
+  opacity: 0; animation: window 9s steps(1) infinite;
+}
+@keyframes window { 0%, 78% { opacity: 0; } 79%, 92% { opacity: 1; } 93% { opacity: 0; } 95%, 97% { opacity: 1; } }
 
 .steps {
   grid-column: 1 / -1;
@@ -301,5 +327,6 @@ button:disabled { opacity: 0.6; cursor: wait; }
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .house-track { left: -36% !important; }
   * { animation: none !important; transition: none !important; }
 }

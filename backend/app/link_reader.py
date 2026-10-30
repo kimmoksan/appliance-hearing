@@ -125,6 +125,8 @@ def fetch_html(url: str) -> str:
 
 def read_link(url: str) -> tuple[str, str]:
     name, text = extract(fetch_html(url))
+    if "로그인" in name or "login" in name.lower():
+        raise LinkError("로그인이 필요한 페이지로 넘어가서 제품 정보를 읽지 못했어요.")
     if len(text) < 30:
         raise LinkError("페이지에서 읽을 수 있는 내용이 거의 없어요. 화면을 스크립트로 그리는 사이트일 수 있어요.")
     return name, text

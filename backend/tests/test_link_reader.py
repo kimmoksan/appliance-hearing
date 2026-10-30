@@ -35,3 +35,10 @@ def test_read_link_rejects_nearly_empty_page(monkeypatch):
     monkeypatch.setattr(link_reader, "fetch_html", lambda url: "<html><body><div id=root></div></body></html>")
     with pytest.raises(LinkError):
         link_reader.read_link("https://shop.example/1")
+
+
+def test_read_link_rejects_login_redirect(monkeypatch):
+    page = "<html><head><title>NAVER 로그인</title></head><body>" + "아이디 비밀번호 " * 10 + "</body></html>"
+    monkeypatch.setattr(link_reader, "fetch_html", lambda url: page)
+    with pytest.raises(LinkError):
+        link_reader.read_link("https://smartstore.naver.com/x/products/1")
