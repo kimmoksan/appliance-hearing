@@ -52,46 +52,38 @@ button, input, textarea, select { font: inherit; }
   white-space: nowrap;
 }
 
-/* header */
+/* header — 메뉴·배지는 로고 글자의 아래선(이미지 아래 13% 위)에 맞춘다 */
 .site-header {
+  --logo-h: 44px;
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
-  gap: 8px 28px;
-  min-height: 72px;
-  padding: 10px max(16px, calc((100% - 1200px) / 2 + 16px));
+  align-items: flex-end;
+  gap: 8px 24px;
+  padding: 12px 24px;
   border-bottom: 1px solid var(--line);
   background: rgb(18 18 42 / 0.6);
   backdrop-filter: blur(6px);
 }
-.site-header nav { display: flex; align-items: center; gap: 20px; flex: 1; font-size: 0.9375rem; font-weight: 600; }
-.site-header nav a, .site-header nav .link { color: var(--muted); line-height: 1; transition: color 0.15s; }
-.site-header nav a:hover, .site-header nav .link:hover { color: var(--fg); }
-.site-header .badge { line-height: 1.4; }
-.site-header a, .link {
-  color: var(--fg);
+.site-header nav, .site-header .badge { margin-bottom: calc(var(--logo-h) * 0.13); }
+.site-header nav { display: flex; align-items: flex-end; gap: 18px; flex: 1; }
+.site-header nav a, .site-header nav .link {
+  color: var(--muted);
   background: none;
   border: 0;
   padding: 0;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1;
   text-decoration: none;
   cursor: pointer;
+  transition: color 0.15s;
 }
-.logo {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 0;
-  background: none;
-  border: 0;
-  color: var(--accent);
-  font-weight: 800;
-  font-size: 1.375rem;
-  letter-spacing: 0.08em;
-  cursor: pointer;
-}
-
-.logo img { height: 48px; width: auto; display: block; }
-@media (max-width: 480px) { .logo img { height: 36px; } .site-header { min-height: 56px; gap: 6px 16px; } }
+.site-header nav a:hover, .site-header nav .link:hover { color: var(--fg); }
+.site-header .badge { font-size: 0.75rem; line-height: 1.5; padding: 1px 10px; }
+.link { background: none; border: 0; padding: 0; text-decoration: none; cursor: pointer; }
+.logo { display: inline-flex; padding: 0; background: none; border: 0; cursor: pointer; }
+.logo img { height: var(--logo-h); width: auto; display: block; }
+@media (max-width: 480px) { .site-header { --logo-h: 34px; gap: 6px 14px; padding: 10px 16px; } }
 
 main { max-width: 1200px; margin: 0 auto; padding: 24px 16px 48px; }
 /* 인트로: 왼쪽 여백은 넉넉히, 오른쪽은 좁게. 도트 영역은 최대 폭 제한 */
