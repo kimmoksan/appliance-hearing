@@ -1,11 +1,12 @@
 import os
 
-from fastapi import FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException
 
 from app.gemini import GeminiError, generate_json
 from app.hearing import MOCK_ANSWERS, Hearing, HearingError, HearingRequest, check_scene, live_hearing, mock_hearing
 from app.intake import EXAMPLE, Category, IntakeRequest, Product, build_product
 from app.catalog import CatalogSummary, load_catalog
+from app.rate_limit import limit
 
 app = FastAPI(title="살깡말깡 API")
 
@@ -22,7 +23,7 @@ def health() -> dict[str, str]:
     return {"status": "ok", "mode": current_mode()}
 
 
-@app.post("/api/intake")
+@app.post("/api/intake", dependencies=[Depends(limit)])
 def intake(req: IntakeRequest) -> Product:
     try:
         # shortcut: AI 사양 검색(spec_finder)은 무료 등급에서 Google 검색 도구가 429로 막혀 꺼 둔다.
@@ -42,7 +43,7 @@ def example() -> Product:
     return build_product(EXAMPLE, is_example=True)
 
 
-@app.post("/api/hearing")
+@app.post("/api/hearing", dependencies=[Depends(limit)])
 def hearing(req: HearingRequest) -> Hearing:
     try:
         check_scene(req)

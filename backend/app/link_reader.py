@@ -26,7 +26,8 @@ def is_url(text: str) -> bool:
     return " " not in text and text.lower().startswith(("http://", "https://"))
 
 
-def check_url(url: str) -> None:
+def check_url(url: str) -> str:
+    """검사를 통과한 IP를 돌려준다. 실제 연결은 이 IP로만 해서 DNS rebinding을 막는다."""
     parts = urlsplit(url)
     if parts.scheme not in ("http", "https") or not parts.hostname:
         raise LinkError("http 또는 https 주소만 읽을 수 있어요.")
@@ -34,10 +35,20 @@ def check_url(url: str) -> None:
         infos = socket.getaddrinfo(parts.hostname, parts.port or (443 if parts.scheme == "https" else 80))
     except (socket.gaierror, UnicodeError):
         raise LinkError("주소를 찾을 수 없어요. 링크를 확인해 주세요.")
-    for info in infos:
-        if not ipaddress.ip_address(info[4][0].split("%")[0]).is_global:
-            raise LinkError("내부망이나 로컬 주소는 읽을 수 없어요.")
-    # shortcut: 검사 후 실제 연결 사이에 DNS가 바뀌는 경우(DNS rebinding)는 막지 못함. 공개 배포 전 연결 IP 고정으로 보강.
+    ips = [ipaddress.ip_address(info[4][0].split("%")[0]) for info in infos]
+    if not ips or not all(ip.is_global for ip in ips):
+        raise LinkError("내부망이나 로컬 주소는 읽을 수 없어요.")
+    return str(ips[0])
+
+
+def pinned(url: str, ip: str) -> tuple[str, dict, dict]:
+    """주소의 호스트를 검사한 IP로 바꾼 요청 주소, Host 헤더, TLS 확인용 이름(SNI)."""
+    parts = urlsplit(url)
+    host = f"[{ip}]" if ":" in ip else ip
+    netloc = host + (f":{parts.port}" if parts.port else "")
+    host_header = parts.hostname + (f":{parts.port}" if parts.port else "")
+    ext = {"sni_hostname": parts.hostname} if parts.scheme == "https" else {}
+    return parts._replace(netloc=netloc).geturl(), {"Host": host_header}, ext
 
 
 class _TextExtractor(HTMLParser):
@@ -99,9 +110,9 @@ def _decode(raw: bytes, charset: str | None) -> str:
 def fetch_html(url: str) -> str:
     with httpx.Client(timeout=TIMEOUT_SEC, follow_redirects=False, headers={"User-Agent": USER_AGENT}) as client:
         for _ in range(MAX_REDIRECTS + 1):
-            check_url(url)
+            target, headers, ext = pinned(url, check_url(url))
             try:
-                with client.stream("GET", url) as res:
+                with client.stream("GET", target, headers=headers, extensions=ext) as res:
                     if res.is_redirect:
                         url = urljoin(url, res.headers.get("location", ""))
                         continue
