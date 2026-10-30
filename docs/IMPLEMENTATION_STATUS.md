@@ -46,3 +46,13 @@
 - 이번 수정은 카탈로그 데이터·관련 문서뿐이다. 앱에 카탈로그를 연결하거나 기능 코드를 변경하지 않았다.
 - 개발 문서 9개와 PR 템플릿을 읽고 [다음 개발 인계](catalog/DEVELOPMENT_HANDOFF.md)에 실제 코드와 문서의 차이, 미확인 처리, 다음 작업 순서를 기록했다.
 - 사용자 지시대로 PR·CI·머지, feature/catalog, 결과 요약 구현은 아직 시작하지 않았다. 다음 개발은 사용자와 단계별 테스트하며 진행한다. 사용자의 후속 지시에 따라 docs/catalog와 이 상태 문서를 별도 커밋·푸시 대상으로 변경했다.
+
+## 1단계 청문회 PR 완료 (2026-10-30)
+
+- PR [#6](https://github.com/kimmoksan/appliance-hearing/pull/6): `codex/hearing-pr` → `develop`, 머지 완료. 머지 커밋 `f677fc88709df060e871471e6a4e68a21af9cbe6`.
+- 카탈로그 커밋 `5c277b0`은 PR에서 제외했다. 기존 feature/hearing과 카탈로그를 보존하고 `60e27e5`에서 PR용 브랜치를 분리했다.
+- 로컬 `./scripts/check.ps1`: lint·타입·빌드 통과, 백엔드 29 passed / 기존 경고 1개. [PR CI](https://github.com/kimmoksan/appliance-hearing/actions/runs/41008687025)의 frontend·backend 모두 성공.
+- 검사한 HEAD `c889531258d2ac2607e6a016962d6001d9952b80`을 지정해 머지했다. gh 명령은 로컬 인증 401로 실패하여 GitHub 도구의 expected_head_sha 검증으로 같은 커밋 일치 조건을 적용했다.
+- GitHub 커넥터에 저장소 접근을 설정한 뒤 원격 브랜치 생성·문서 커밋·PR 생성·머지가 정상 동작했다. 저장소는 public이다. 터미널 gh 인증과는 별도다.
+- 브라우저 수동 UI 검증은 미실행. rv_clutter 외 공방은 공통 예시이며 실제 AI·카탈로그 연결·결과 화면은 미구현이다.
+- 단계별 사용자 테스트를 위해 2단계 feature/catalog 구현은 아직 시작하지 않았다. 이 완료 기록은 원래 feature/hearing 브랜치에 남겨 후속 작업에서 참고한다.
