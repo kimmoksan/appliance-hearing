@@ -35,6 +35,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     }
     throw new ApiError('입력값을 확인해 주세요.', fields)
   }
+  if (res.status === 429) throw new ApiError('요청이 너무 잦아요. 1분쯤 뒤에 다시 시도해 주세요. 입력한 내용은 그대로 있어요.')
   if (!res.ok) throw new ApiError('요청을 처리하지 못했어요. 입력한 내용은 그대로 있어요. 다시 시도해 주세요.')
   return res.json()
 }
